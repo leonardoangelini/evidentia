@@ -1,0 +1,33 @@
+:root{--fg:#1f2937;--muted:#6b7280;--line:#e5e7eb;--bg:#ffffff;--bg2:#f8fafc;--accent:#1d4ed8;--accent2:#dbeafe;--ok:#15803d;--warn:#b45309;--danger:#b91c1c;--paste:#b91c1c;--rev:#7c3aed}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--fg);background:var(--bg)}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:24px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}h3{font-size:14px;margin:16px 0 6px}
+p{margin:6px 0}.muted{color:var(--muted)}.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+button{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--fg);cursor:pointer}
+button:hover{background:var(--bg2)}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button.primary:hover{background:#1e40af}
+button.danger{color:var(--danger);border-color:#fecaca}button.danger:hover{background:#fef2f2}button:disabled{opacity:.5;cursor:default}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;white-space:nowrap}
+tr.selectable{cursor:pointer}tr.selectable:hover{background:var(--bg2)}tr.selected{background:var(--accent2)}
+.kv th{width:40%}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--line)}
+.badge.ok{background:#dcfce7;color:var(--ok)}.badge.warn{background:#fef3c7;color:var(--warn)}.badge.danger{background:#fee2e2;color:var(--danger)}.badge.rev{background:#ede9fe;color:var(--rev)}
+.gap{border-left:4px solid var(--warn);padding:8px 12px;margin:8px 0;background:#fffbeb;border-radius:4px}
+.notice{border:1px solid var(--line);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;background:var(--bg2);margin:16px 0}
+blockquote{margin:4px 0;padding:6px 10px;background:#f3f4f6;border-radius:4px;font-size:13px;white-space:pre-wrap}
+.del{border-left:3px solid var(--danger)}.add{border-left:3px solid var(--ok)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}.card .v{font-size:20px;font-weight:600}.card .k{color:var(--muted);font-size:12px}
+input,select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;width:100%}
+label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
+.legend span{display:inline-block;margin-right:14px;font-size:12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:10px;overflow:auto;max-height:480px;font-size:12px}
+ins{background:#dcfce7;text-decoration:none}del{background:#fee2e2}
+.diffpara{padding:4px 8px;margin:2px 0;border-radius:4px}.diffpara.removed{background:#fef2f2}.diffpara.added{background:#f0fdf4}.diffpara.modified{background:#fffbeb}
+/* Inline explanations: hover or focus shows the definition of a value. */
+.info{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:5px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);background:#fff;font:600 10px/1 system-ui,sans-serif;cursor:help;vertical-align:middle;position:relative;padding:0}
+.info:hover,.info:focus{border-color:var(--accent);color:var(--accent);outline:none;background:#fff}
+.info::after{content:attr(data-tip);position:absolute;left:0;top:20px;z-index:20;width:320px;max-width:70vw;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--fg);font:400 12px/1.45 system-ui,sans-serif;text-align:left;white-space:normal;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none}
+.info:hover::after,.info:focus::after{display:block}.info.left::after{left:auto;right:0}
+th .info{margin-left:3px}.card .k{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.glossary dt{font-weight:600;margin-top:10px}.glossary dd{margin:2px 0 0 0;color:var(--fg)}.glossary .badge{margin-left:6px}

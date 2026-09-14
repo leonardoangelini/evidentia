@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Evidentia">
+  <title>Evidentia — mark</title>
+  <!-- Rounded tile -->
+  <rect x="0" y="0" width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <!-- The E: a stem and three arms that grow from version to version -->
+  <rect x="15" y="16" width="7" height="32" rx="3.5" fill="#ffffff"/>
+  <rect x="15" y="16" width="16" height="7" rx="3.5" fill="#ffffff"/>
+  <rect x="15" y="28.5" width="24" height="7" rx="3.5" fill="#ffffff"/>
+  <rect x="15" y="41" width="34" height="7" rx="3.5" fill="#ffffff"/>
+  <!-- Version dots at the tip of each arm -->
+  <circle cx="35" cy="19.5" r="2.4" fill="#93c5fd"/>
+  <circle cx="43" cy="32" r="2.4" fill="#93c5fd"/>
+  <circle cx="53" cy="44.5" r="2.4" fill="#93c5fd"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Evidentia">
+  <title>Evidentia — mark, single colour (uses currentColor)</title>
+  <rect x="11" y="12" width="7" height="40" rx="3.5" fill="currentColor"/>
+  <rect x="11" y="12" width="18" height="7" rx="3.5" fill="currentColor"/>
+  <rect x="11" y="28.5" width="28" height="7" rx="3.5" fill="currentColor"/>
+  <rect x="11" y="45" width="40" height="7" rx="3.5" fill="currentColor"/>
+  <circle cx="34" cy="15.5" r="2.6" fill="currentColor" opacity=".45"/>
+  <circle cx="44" cy="32" r="2.6" fill="currentColor" opacity=".45"/>
+  <circle cx="56" cy="48.5" r="2.6" fill="currentColor" opacity=".45"/>
+</svg>

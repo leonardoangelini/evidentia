@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Evidentia: dev (Chrome con estensione)",
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Evidentia: dev (Edge con estensione)",
+      "type": "npm",
+      "script": "dev:edge",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Evidentia: test",
+      "type": "npm",
+      "script": "test",
+      "problemMatcher": [],
+      "group": "test"
+    }
+  ]
+}

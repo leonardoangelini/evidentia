@@ -1,0 +1,66 @@
+{
+  "name": "evidentia",
+  "version": "0.1.0",
+  "description": "Evidentia - learning process evidence from the version history of Word (SharePoint/OneDrive) and Google Docs documents (browser extension, Manifest V3)",
+  "license": "Apache-2.0",
+  "author": "Leonardo Angelini",
+  "homepage": "https://github.com/leonardoangelini/evidentia#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonardoangelini/evidentia.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leonardoangelini/evidentia/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "sharepoint",
+    "google-docs",
+    "version-history",
+    "education",
+    "writing-process",
+    "academic-integrity"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:edge": "node scripts/prepare-dev-profile.mjs && wxt -b edge",
+    "build": "wxt build",
+    "build:edge": "wxt build -b edge",
+    "zip": "wxt zip",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "wxt prepare",
+    "demo:export": "tsx scripts/demo-export.ts",
+    "predev": "node scripts/prepare-dev-profile.mjs",
+    "brand:build": "node scripts/build-brand.mjs",
+    "store:shots": "node scripts/capture-store-screenshots.mjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.2.9",
+    "@types/jsdom": "^30.0.0",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^30.0.1",
+    "opentype.js": "^2.0.0",
+    "playwright-core": "^1.63.0",
+    "publish-browser-extension": "^6.1.1",
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0",
+    "web-ext": "^10.6.0",
+    "wxt": "^0.21.4"
+  },
+  "dependencies": {
+    "@types/diff": "^7.0.2",
+    "diff": "^9.0.0",
+    "fflate": "^0.8.3",
+    "idb": "^8.0.3"
+  }
+}

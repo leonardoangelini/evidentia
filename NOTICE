@@ -1,0 +1,39 @@
+Evidentia
+Copyright 2026 Leonardo Angelini
+
+Questo prodotto include software sviluppato da Leonardo Angelini.
+Distribuito secondo i termini della Apache License, Version 2.0 (vedi LICENSE).
+
+---
+
+Marchio e immagine coordinata
+-----------------------------
+
+Il nome "Evidentia", il marchio figurativo ("Fogli") e i file derivati in
+brand/ e public/icon/ non sono coperti dalla licenza del codice: la Apache
+License 2.0 non concede diritti sui marchi (sezione 6).
+
+Un fork o una versione modificata può usare liberamente il codice, ma deve
+essere distribuito con un nome e un marchio propri, distinguibili da
+"Evidentia" — in particolare sul Chrome Web Store, dove un'estensione
+omonima genererebbe confusione per gli utenti. Per un uso del marchio
+diverso da questo, chiedere all'autore.
+
+
+Componenti di terze parti
+-------------------------
+
+Manrope (brand/src/fonts/)
+  Copyright 2018 The Manrope Project Authors
+  SIL Open Font License 1.1 — testo completo in brand/src/fonts/OFL.txt
+
+Le dipendenze runtime incluse nel bundle dell'estensione conservano le
+proprie licenze:
+
+  diff    — BSD-3-Clause
+  idb     — ISC
+  fflate  — MIT
+
+L'elenco completo, con versioni e licenze, si ottiene con:
+
+  npx license-checker --production --summary

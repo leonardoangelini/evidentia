@@ -1,0 +1,24 @@
+node_modules/
+.output/
+.wxt/
+dist/
+*.log
+.DS_Store
+stats.html
+
+# Configurazione locale: client ID OAuth, chiave che fissa l'id dell'estensione.
+.env
+.env.*
+!.env.example
+
+# Credenziali di pubblicazione: non devono mai entrare nel repository.
+# (Chiave del service account del Chrome Web Store, chiavi generate in locale.)
+*.pem
+*.p12
+sa.json
+service-account*.json
+key.pem
+
+# Export ed esperimenti locali: possono contenere documenti reali.
+demo-exports/
+*.evidentia.zip

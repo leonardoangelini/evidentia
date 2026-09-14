@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Evidentia — Pagina">
+  <title>Evidentia — alternativa "Pagina": un documento che si riempie riga dopo riga</title>
+  <rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="16" y="10" width="32" height="44" rx="5" fill="#ffffff"/>
+  <rect x="22" y="18" width="7" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="26" width="12" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="34" width="17" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="42" width="20" height="4" rx="2" fill="#1d4ed8"/>
+  <circle cx="44.5" cy="44" r="2.2" fill="#93c5fd"/>
+</svg>

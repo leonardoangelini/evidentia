@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Evidentia — Gradini">
+  <title>Evidentia — alternativa "Gradini": il conteggio sale a scatti, un gradino per versione</title>
+  <rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <path d="M12,51 H22 V40 H32 V29 H42 V18 H52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="18" r="4" fill="#93c5fd"/>
+</svg>

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidentia — identità visiva</title>
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ink:#0f172a; --paper:#f7f9fc; --panel:#ffffff; --line:#dbe2ee; --muted:#5b6b82;
+    --blue:#1d4ed8; --blue-soft:#93c5fd; --blue-tint:#e8effc; --dark-tile:#0f172a;
+    --display:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){--ink:#e8eef8;--paper:#0b1220;--panel:#111a2c;--line:#243248;--muted:#94a3b8;--blue:#3b6fe6;--blue-tint:#172447;--dark-tile:#0f172a;color-scheme:dark}
+  }
+  :root[data-theme="dark"]{--ink:#e8eef8;--paper:#0b1220;--panel:#111a2c;--line:#243248;--muted:#94a3b8;--blue:#3b6fe6;--blue-tint:#172447;--dark-tile:#0f172a;color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--body);padding-block:40px 72px;padding-inline:clamp(16px,4vw,48px)}
+  .wrap{max-width:1040px;margin-inline:auto;display:grid;gap:40px}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+  h1{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  h2{font-size:20px;font-weight:700;letter-spacing:-.01em}
+  h3{font-size:15px;font-weight:700}
+  p{margin:0;max-width:62ch}
+  .eyebrow{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  header{display:grid;gap:12px}
+  /* hero */
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:40px;display:flex;align-items:center;justify-content:center;min-height:300px}
+  .stage.dark{background:var(--dark-tile);border-color:var(--dark-tile)}
+  .lockup{display:flex;align-items:center;gap:22px}
+  .lockup .name{font:800 44px/1 var(--display);letter-spacing:-.03em;color:var(--ink)}
+  .stage.dark .lockup .name{color:#fff}
+  .lockup svg{width:88px;height:88px;flex:none}
+  /* sections */
+  section{display:grid;gap:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:12px;align-content:start}
+  .tile .art{display:flex;align-items:center;justify-content:center;min-height:120px}
+  .tile.dark{background:var(--dark-tile);border-color:var(--dark-tile);color:#e8eef8}
+  .sizes{display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+  .size{display:grid;gap:8px;justify-items:center}
+  .size .cap{font:400 12px/1 var(--mono);color:var(--muted)}
+  .rationale{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:start}
+  .anatomy{background:var(--blue-tint);border-radius:12px;padding:24px;display:flex;justify-content:center}
+  .anatomy svg{width:min(100%,280px);height:auto}
+  dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+  dt{font:500 12px/1.5 var(--mono);color:var(--muted)}
+  dd{margin:0}
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .rule{border-top:2px solid var(--line);padding-top:12px;display:grid;gap:6px}
+  .rule.do{border-top-color:var(--blue)}
+  .alts{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .tile.alt .strip{display:flex;align-items:flex-end;gap:10px;justify-content:center;padding-bottom:4px}
+  .tile.alt .limit{font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+  .tile.alt .limit .eyebrow{display:block;margin-bottom:2px}
+  .toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+  .toolbar .icons{display:flex;gap:10px;align-items:center;background:var(--blue-tint);padding:8px 12px;border-radius:8px}
+  .swatches{display:flex;gap:12px;flex-wrap:wrap}
+  .swatch{display:grid;gap:6px;width:120px}
+  .swatch i{display:block;height:48px;border-radius:8px;border:1px solid var(--line)}
+  .swatch b{font:500 12px/1.3 var(--mono)}
+  .ui-brand{font:800 13px/1 var(--display);letter-spacing:.12em;display:inline-flex;align-items:center;gap:8px}
+  .ui-brand svg{width:18px;height:18px}
+  @media (max-width:720px){.hero,.rationale{grid-template-columns:1fr}.lockup .name{font-size:34px}.lockup svg{width:64px;height:64px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Identità visiva · versione scelta: "Fogli" · 13 settembre 2026</div>
+    <h1>Evidentia: tre versioni, una sull'altra</h1>
+    <p class="muted">Il marchio scelto è "Fogli": tre versioni di un documento una sull'altra, la più recente in primo piano con le sue righe di testo; la riga azzurra è il punto in cui il testo si ferma oggi. Dice "documento" prima di "processo", ed è quello che un docente riconosce al volo nella barra di Chrome. Niente lenti, niente occhi, niente lucchetti: Evidentia rende osservabile un processo, non sorveglia chi scrive.</p>
+  </header>
+
+  <section class="hero">
+    <div class="stage">
+      <div class="lockup">
+        <svg viewBox="0 0 64 64" role="img" aria-label="Marchio Evidentia"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#1d4ed8"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#1d4ed8"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></svg>
+        <span class="name">Evidentia</span>
+      </div>
+    </div>
+    <div class="stage dark">
+      <div class="lockup">
+        <svg viewBox="0 0 64 64" role="img" aria-label="Marchio Evidentia su fondo scuro"><rect width="64" height="64" rx="15" fill="#3b6fe6"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#3b6fe6"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#3b6fe6"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></svg>
+        <span class="name">Evidentia</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="rationale">
+    <div style="display:grid;gap:14px">
+      <div class="eyebrow">Costruzione</div>
+      <h2>Tre fogli, un cursore</h2>
+      <p>Griglia di 64 unità, riquadro con raggio 15. I tre fogli sono identici (25 × 31, raggio 4) e slittano di 6,5 unità in diagonale: quello dietro al 30 % di bianco, quello in mezzo al 60 %, quello davanti pieno. Sul foglio davanti due righe blu di 15 unità e una riga azzurra di 9: il testo finisce lì. Nella versione monocroma le righe sono fori nel foglio, così il marchio funziona su qualsiasi fondo senza conoscere il colore sotto.</p>
+      <dl>
+        <dt>griglia</dt><dd>64 × 64, riquadro con raggio 15</dd>
+        <dt>fogli</dt><dd>25 × 31, raggio 4, offset 6,5 · opacità 30 / 60 / 100 %</dd>
+        <dt>righe</dt><dd>15 · 15 · 9 unità, altezza 3,5; l'ultima in azzurro #93C5FD</dd>
+        <dt>area libera</dt><dd>almeno un quarto del lato del riquadro su ogni lato</dd>
+      </dl>
+    </div>
+    <div class="anatomy">
+      <svg viewBox="0 0 140 100" role="img" aria-label="Anatomia del marchio con misure">
+        <g transform="translate(8,8)"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#1d4ed8"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#1d4ed8"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></g>
+        <g font-family="IBM Plex Mono, monospace" font-size="6" fill="#1d4ed8">
+          <line x1="22" y1="82" x2="47" y2="82" stroke="#1d4ed8" stroke-width=".8"/><text x="49" y="84">25</text>
+          <line x1="82" y1="31" x2="82" y2="62" stroke="#1d4ed8" stroke-width=".8"/><text x="85" y="48">31</text>
+          <line x1="22" y1="90" x2="28.5" y2="90" stroke="#93c5fd" stroke-width="2"/><text x="31" y="92">offset 6,5</text>
+          <text x="85" y="14">v1 · v2 · v3</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Scala</div>
+    <h2>Dal negozio Chrome all'icona da 16 pixel</h2>
+    <div class="sizes">
+      <div class="size"><svg width="128" height="128" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#1d4ed8"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#1d4ed8"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></svg><span class="cap">128</span></div>
+      <div class="size"><svg width="48" height="48" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#1d4ed8"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#1d4ed8"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></svg><span class="cap">48</span></div>
+      <div class="size"><svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><span class="cap">32</span></div>
+      <div class="size"><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><span class="cap">16</span></div>
+      <div class="size"><span class="ui-brand"><svg viewBox="0 0 64 64"><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="currentColor" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="currentColor" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="currentColor" fill-rule="evenodd"/></svg>EVIDENTIA</span><span class="cap">barra laterale</span></div>
+    </div>
+    <p class="muted">Sotto i 32 pixel i tre fogli si fonderebbero: la versione piccola ne usa due, con offset maggiore e righe più spesse, così a 16 pixel si legge ancora "un documento e la sua versione precedente".</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Varianti</div>
+    <h2>Un solo marchio, quattro usi</h2>
+    <div class="grid">
+      <div class="tile"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z" fill="#ffffff"/><path d="M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z" fill="#1d4ed8"/><path d="M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z" fill="#1d4ed8"/><path d="M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#93c5fd"/></svg></div><h3>Principale</h3><p class="muted">Icona dell'estensione, Chrome Web Store, popup.</p></div>
+      <div class="tile"><div class="art" style="color:var(--blue)"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="currentColor" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="currentColor" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="currentColor" fill-rule="evenodd"/></svg></div><h3>Monocromo</h3><p class="muted">Senza riquadro, colore ereditato, righe a giorno: barra laterale, intestazioni dei report, stampa.</p></div>
+      <div class="tile dark"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M31,10 H48 A4,4 0 0 1 52,14 V37 A4,4 0 0 1 48,41 H31 A4,4 0 0 1 27,37 V14 A4,4 0 0 1 31,10 Z" fill="#ffffff" opacity="0.3"/><path d="M24.5,16.5 H41.5 A4,4 0 0 1 45.5,20.5 V43.5 A4,4 0 0 1 41.5,47.5 H24.5 A4,4 0 0 1 20.5,43.5 V20.5 A4,4 0 0 1 24.5,16.5 Z" fill="#ffffff" opacity="0.6"/><path d="M18,23 H35 A4,4 0 0 1 39,27 V50 A4,4 0 0 1 35,54 H18 A4,4 0 0 1 14,50 V27 A4,4 0 0 1 18,23 Z M20.75,31 H32.25 A1.75,1.75 0 0 1 34,32.75 V32.75 A1.75,1.75 0 0 1 32.25,34.5 H20.75 A1.75,1.75 0 0 1 19,32.75 V32.75 A1.75,1.75 0 0 1 20.75,31 Z M20.75,38 H32.25 A1.75,1.75 0 0 1 34,39.75 V39.75 A1.75,1.75 0 0 1 32.25,41.5 H20.75 A1.75,1.75 0 0 1 19,39.75 V39.75 A1.75,1.75 0 0 1 20.75,38 Z M20.75,45 H26.25 A1.75,1.75 0 0 1 28,46.75 V46.75 A1.75,1.75 0 0 1 26.25,48.5 H20.75 A1.75,1.75 0 0 1 19,46.75 V46.75 A1.75,1.75 0 0 1 20.75,45 Z" fill="#ffffff" fill-rule="evenodd"/></svg></div><h3>Negativo</h3><p class="muted">Bianco su fondi scuri o fotografici.</p></div>
+      <div class="tile"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg></div><h3>Piccolo</h3><p class="muted">Per 16 e 32 pixel: due fogli, righe più spesse. È quello che va nel manifest a 16 e 32.</p></div>
+    </div>
+  </section>
+
+
+  <section>
+    <div class="eyebrow">Cinque alternative</div>
+    <h2>Le altre metafore valutate</h2>
+    <p class="muted">Tutte partono dallo stesso fatto: una sequenza di versioni che cresce nel tempo. Cambia l'oggetto che la racconta. Stesso riquadro, stessi due colori, così il confronto è solo sull'idea.</p>
+    <div class="grid alts">
+      <div class="tile alt"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="27" y="10" width="25" height="31" rx="4" fill="#ffffff" opacity=".3"/>
+  <rect x="20.5" y="16.5" width="25" height="31" rx="4" fill="#ffffff" opacity=".6"/>
+  <rect x="14" y="23" width="25" height="31" rx="4" fill="#ffffff"/>
+  <rect x="19" y="31" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="38" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="45" width="9" height="3.5" rx="1.75" fill="#93c5fd"/></svg></div><div class="strip"><svg width="32" height="32" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="27" y="10" width="25" height="31" rx="4" fill="#ffffff" opacity=".3"/>
+  <rect x="20.5" y="16.5" width="25" height="31" rx="4" fill="#ffffff" opacity=".6"/>
+  <rect x="14" y="23" width="25" height="31" rx="4" fill="#ffffff"/>
+  <rect x="19" y="31" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="38" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="45" width="9" height="3.5" rx="1.75" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="27" y="10" width="25" height="31" rx="4" fill="#ffffff" opacity=".3"/>
+  <rect x="20.5" y="16.5" width="25" height="31" rx="4" fill="#ffffff" opacity=".6"/>
+  <rect x="14" y="23" width="25" height="31" rx="4" fill="#ffffff"/>
+  <rect x="19" y="31" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="38" width="15" height="3.5" rx="1.75" fill="#1d4ed8"/>
+  <rect x="19" y="45" width="9" height="3.5" rx="1.75" fill="#93c5fd"/></svg></div><h3>Fogli</h3><p class="muted">Tre versioni una sull'altra, la più recente in primo piano con le sue righe. Dice "documento" prima di "processo".</p><p class="muted limit"><span class="eyebrow">limite</span> A 16 pixel i tre fogli si fondono in un rettangolo con un'orecchia: resta leggibile, ma perde la sequenza.</p></div>
+      <div class="tile alt"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <line x1="21" y1="16" x2="21" y2="48" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="21" cy="16" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="32" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="48" r="4.5" fill="#1d4ed8" stroke="#ffffff" stroke-width="3.5"/>
+  <rect x="30" y="13.5" width="9" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="29.5" width="15" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="45.5" width="22" height="5" rx="2.5" fill="#93c5fd"/></svg></div><div class="strip"><svg width="32" height="32" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <line x1="21" y1="16" x2="21" y2="48" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="21" cy="16" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="32" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="48" r="4.5" fill="#1d4ed8" stroke="#ffffff" stroke-width="3.5"/>
+  <rect x="30" y="13.5" width="9" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="29.5" width="15" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="45.5" width="22" height="5" rx="2.5" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <line x1="21" y1="16" x2="21" y2="48" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="21" cy="16" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="32" r="4.5" fill="#ffffff"/>
+  <circle cx="21" cy="48" r="4.5" fill="#1d4ed8" stroke="#ffffff" stroke-width="3.5"/>
+  <rect x="30" y="13.5" width="9" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="29.5" width="15" height="5" rx="2.5" fill="#93c5fd"/>
+  <rect x="30" y="45.5" width="22" height="5" rx="2.5" fill="#93c5fd"/></svg></div><h3>Cronologia</h3><p class="muted">Una dorsale con tre nodi, come un registro di versioni; a destra di ogni nodo, la dimensione della variazione. L'ultimo nodo è vuoto: la versione corrente, ancora aperta.</p><p class="muted limit"><span class="eyebrow">limite</span> È il più "da sviluppatori" dei cinque; ai docenti può ricordare Git più che Word.</p></div>
+      <div class="tile alt"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="16" y="10" width="32" height="44" rx="5" fill="#ffffff"/>
+  <rect x="22" y="18" width="7" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="26" width="12" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="34" width="17" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="42" width="20" height="4" rx="2" fill="#1d4ed8"/>
+  <circle cx="44.5" cy="44" r="2.2" fill="#93c5fd"/></svg></div><div class="strip"><svg width="32" height="32" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="16" y="10" width="32" height="44" rx="5" fill="#ffffff"/>
+  <rect x="22" y="18" width="7" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="26" width="12" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="34" width="17" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="42" width="20" height="4" rx="2" fill="#1d4ed8"/>
+  <circle cx="44.5" cy="44" r="2.2" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <rect x="16" y="10" width="32" height="44" rx="5" fill="#ffffff"/>
+  <rect x="22" y="18" width="7" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="26" width="12" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="34" width="17" height="4" rx="2" fill="#1d4ed8"/>
+  <rect x="22" y="42" width="20" height="4" rx="2" fill="#1d4ed8"/>
+  <circle cx="44.5" cy="44" r="2.2" fill="#93c5fd"/></svg></div><h3>Pagina</h3><p class="muted">Un foglio che si riempie riga dopo riga, con il cursore azzurro dove il testo si ferma oggi. È il più immediato per chi non conosce il prodotto.</p><p class="muted limit"><span class="eyebrow">limite</span> Somiglia a molte icone di documento; la crescita delle righe è l'unico tratto distintivo e va difesa.</p></div>
+      <div class="tile alt"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <circle cx="14" cy="50" r="3.5" fill="#93c5fd"/>
+  <path d="M14,38 A12,12 0 0 1 26,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".45"/>
+  <path d="M14,28 A22,22 0 0 1 36,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".7"/>
+  <path d="M14,18 A32,32 0 0 1 46,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".85"/>
+  <path d="M14,8 A42,42 0 0 1 56,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/></svg></div><div class="strip"><svg width="32" height="32" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <circle cx="14" cy="50" r="3.5" fill="#93c5fd"/>
+  <path d="M14,38 A12,12 0 0 1 26,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".45"/>
+  <path d="M14,28 A22,22 0 0 1 36,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".7"/>
+  <path d="M14,18 A32,32 0 0 1 46,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".85"/>
+  <path d="M14,8 A42,42 0 0 1 56,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/></svg><svg width="16" height="16" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <circle cx="14" cy="50" r="3.5" fill="#93c5fd"/>
+  <path d="M14,38 A12,12 0 0 1 26,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".45"/>
+  <path d="M14,28 A22,22 0 0 1 36,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".7"/>
+  <path d="M14,18 A32,32 0 0 1 46,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity=".85"/>
+  <path d="M14,8 A42,42 0 0 1 56,50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/></svg></div><h3>Anelli</h3><p class="muted">Gli anelli di un tronco: ogni versione aggiunge uno strato, nessuno cancella i precedenti. Il centro azzurro è il primo salvataggio.</p><p class="muted limit"><span class="eyebrow">limite</span> Il più evocativo e il meno letterale; a 16 pixel gli anelli interni si chiudono e ne restano due.</p></div>
+      <div class="tile alt"><div class="art"><svg width="96" height="96" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <path d="M12,51 H22 V40 H32 V29 H42 V18 H52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="18" r="4" fill="#93c5fd"/></svg></div><div class="strip"><svg width="32" height="32" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <path d="M12,51 H22 V40 H32 V29 H42 V18 H52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="18" r="4" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64" ><rect width="64" height="64" rx="15" fill="#1d4ed8"/>
+  <path d="M12,51 H22 V40 H32 V29 H42 V18 H52" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="18" r="4" fill="#93c5fd"/></svg></div><h3>Gradini</h3><p class="muted">Il conteggio delle parole sale a scatti, un gradino per versione: fra un gradino e l'altro non si vede nulla, ed è proprio ciò che l'estensione dichiara.</p><p class="muted limit"><span class="eyebrow">limite</span> Forte a ogni dimensione; rischia di leggersi come "crescita" generica, da app finanziaria.</p></div>
+    </div>
+    <div class="toolbar"><span class="eyebrow">A 16 pixel nella barra di Chrome</span><div class="icons"><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg><svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1d4ed8"/><path d="M29,9 H48 A5,5 0 0 1 53,14 V41 A5,5 0 0 1 48,46 H29 A5,5 0 0 1 24,41 V14 A5,5 0 0 1 29,9 Z" fill="#ffffff" opacity="0.5"/><path d="M16,18 H35 A5,5 0 0 1 40,23 V50 A5,5 0 0 1 35,55 H16 A5,5 0 0 1 11,50 V23 A5,5 0 0 1 16,18 Z" fill="#ffffff"/><path d="M19.5,29 H31.5 A2.5,2.5 0 0 1 34,31.5 V31.5 A2.5,2.5 0 0 1 31.5,34 H19.5 A2.5,2.5 0 0 1 17,31.5 V31.5 A2.5,2.5 0 0 1 19.5,29 Z" fill="#1d4ed8"/><path d="M19.5,39 H25.5 A2.5,2.5 0 0 1 28,41.5 V41.5 A2.5,2.5 0 0 1 25.5,44 H19.5 A2.5,2.5 0 0 1 17,41.5 V41.5 A2.5,2.5 0 0 1 19.5,39 Z" fill="#93c5fd"/></svg></div><span class="muted mono" style="font-size:12px">E · Fogli · Cronologia · Pagina · Anelli · Gradini</span></div>
+    <p class="muted">Scelta finale: <strong>Fogli</strong>. Le altre restano in <span class="mono">brand/alternative/</span> e <span class="mono">brand/concepts/</span> (la E che cresce e la timeline).</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Colore e carattere</div>
+    <h2>Il blu che l'interfaccia usa già</h2>
+    <div class="swatches">
+      <div class="swatch"><i style="background:#1d4ed8"></i><b>#1D4ED8</b><span class="muted">blu Evidentia</span></div>
+      <div class="swatch"><i style="background:#93c5fd"></i><b>#93C5FD</b><span class="muted">punto versione</span></div>
+      <div class="swatch"><i style="background:#0f172a"></i><b>#0F172A</b><span class="muted">inchiostro</span></div>
+      <div class="swatch"><i style="background:#f7f9fc"></i><b>#F7F9FC</b><span class="muted">carta</span></div>
+    </div>
+    <p>Il wordmark è <strong>Manrope 800</strong> con spaziatura −3%: geometrico quanto la E del marchio, senza esserne una copia. Nella barra laterale resta la versione in maiuscoletto spaziato già in uso, <span class="ui-brand" style="font-size:12px">EVIDENTIA</span>, preceduta dal marchio monocromo. Per i testi dei report la coppia è IBM Plex Sans e IBM Plex Mono: i numeri tabellari del Mono sono fatti per colonne di versioni e conteggi.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Regole d'uso</div>
+    <h2>Cosa evitare</h2>
+    <div class="rules">
+      <div class="rule do"><h3>Sì</h3><p class="muted">Riquadro blu su qualsiasi fondo; monocromo quando il fondo è già colorato; punti solo da 32 pixel in su.</p></div>
+      <div class="rule"><h3>Niente lente, occhio, scudo</h3><p class="muted">Sono i simboli del rilevamento e della sorveglianza. Evidentia non rileva nulla e non giudica: descrive versioni.</p></div>
+      <div class="rule"><h3>Niente fogli riordinati</h3><p class="muted">Il foglio davanti è sempre la versione più recente, in basso a sinistra. Invertire l'ordine cambia il racconto.</p></div>
+      <div class="rule"><h3>Niente gradienti o ombre</h3><p class="muted">Il marchio deve restare piatto e leggibile a 16 pixel accanto alle altre icone della barra di Chrome.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">File</div>
+    <p class="muted mono" style="font-size:13px">brand/svg/ (originali) · brand/png/ · brand/store/ · brand/social/ · brand/favicon.ico · brand/README.md · npm run brand:build</p>
+  </section>
+</div>
+
+</body>
+</html>
