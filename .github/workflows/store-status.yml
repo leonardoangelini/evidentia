@@ -1,0 +1,39 @@
+# Interroga il Chrome Web Store sullo stato dell'item: versione pubblicata,
+# eventuale submission in review, visibilità. Sola lettura, non pubblica nulla.
+#
+# Usa l'environment `chrome-web-store` perché è lì che vivono le credenziali:
+# di conseguenza chiede la stessa approvazione del rilascio. È il prezzo di
+# tenere i secret fuori dalla portata di qualunque altro workflow.
+name: Store status
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    name: Stato dell'item
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Interroga lo store
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          PRIVATE_KEY_B64: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64 }}
+        run: |
+          set -e
+          export CHROME_SERVICE_ACCOUNT_PRIVATE_KEY="$(echo "$PRIVATE_KEY_B64" | base64 -d)"
+          npx publish-extension status --chrome-api-version v2
