@@ -58,3 +58,6 @@ jobs:
           path: .output/*-chrome.zip
           retention-days: 30
           if-no-files-found: error
+          # .output/ inizia con un punto: senza questo, upload-artifact la
+          # tratta come nascosta, non trova nulla e il job fallisce.
+          include-hidden-files: true
