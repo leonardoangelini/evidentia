@@ -1,177 +1,237 @@
-# Evidentia
+<div align="center">
 
-Browser extension (Chrome / Edge, Manifest V3) per **docenti**: legge la
-cronologia delle versioni che il server conserva per un documento
-(SharePoint/OneDrive per Word, Google Drive per Google Docs) e ricostruisce
-il processo di scrittura.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/png/lockup-horizontal-white-1600.png">
+  <img src="brand/png/lockup-horizontal-1600.png" alt="Evidentia" width="380">
+</picture>
 
-> Evidentia non dimostra chi abbia scritto un testo e non dimostra l'uso di AI.
-> Rende osservabile una parte del processo con cui il testo è stato prodotto,
-> attraverso le versioni conservate dal server.
+**Rende visibile il processo con cui un testo è stato scritto,
+a partire dalla cronologia delle versioni che il server conserva già.**
 
-Per ogni versione: data, autore (etichetta pseudonima), testo, conteggi.
-Da queste: diff fra versioni, sessioni (versioni vicine nel tempo), grandi
-inserimenti, revisioni, metriche deterministiche, **gap di osservazione**,
-report HTML e input pronto per un LLM. Tutto resta nel browser.
+[![CI](https://github.com/leonardoangelini/evidentia/actions/workflows/ci.yml/badge.svg)](https://github.com/leonardoangelini/evidentia/actions/workflows/ci.yml)
+[![Licenza: Apache 2.0](https://img.shields.io/badge/licenza-Apache%202.0-blue.svg)](LICENSE)
+[![Manifest V3](https://img.shields.io/badge/Chrome%20%2F%20Edge-Manifest%20V3-1D4ED8.svg)](#installazione)
 
-Documentazione di progetto:
+</div>
 
-- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — analisi, architettura, scelte
-- [DATA_MODEL.md](DATA_MODEL.md) — modello dati e schema di export
-- [PRIVACY.md](PRIVACY.md) — principi, modalità FULL / METRICS_ONLY, permessi
-- [RELEASE.md](RELEASE.md) — CI/CD e pubblicazione sul Chrome Web Store
-- [STORE_LISTING.md](STORE_LISTING.md) — testi della scheda Chrome Web Store
-- [WORD_ONLINE_NOTES.md](WORD_ONLINE_NOTES.md) — API SharePoint, DOCX, limiti
-- [GOOGLE_DOCS_NOTES.md](GOOGLE_DOCS_NOTES.md) — API Drive, OAuth, client ID, limiti delle revisioni Google
+---
 
-## Requisiti
+Evidentia è un'estensione per browser rivolta ai **docenti**. Dato un documento
+Word su SharePoint/OneDrive o un documento Google Docs, legge la cronologia
+delle versioni che il server conserva e la trasforma in una ricostruzione
+leggibile: quando si è lavorato, in quante sedute, cosa è comparso in ciascuna,
+cosa è stato riscritto e cosa è stato eliminato.
 
-- Node.js ≥ 20 (sviluppato con Node 26)
-- Chrome o Edge recenti
-- Per Word: account Microsoft 365 di lavoro o scuola con accesso al documento
-  (SharePoint Online / OneDrive for Business; OneDrive consumer non supportato)
-- Per Google Docs: account Google con accesso al documento e un client ID
-  OAuth 2.0 (della scuola o compilato nella build con `WXT_GOOGLE_CLIENT_ID`,
-  vedi [GOOGLE_DOCS_NOTES.md](GOOGLE_DOCS_NOTES.md))
+Tutto avviene **nel browser del docente**. Non esiste un server di Evidentia,
+non c'è telemetria, nessun testo viene inviato a servizi terzi.
 
-> **Se forki il progetto**: registra un client ID OAuth tuo. Quello della build
-> ufficiale non è nel repository, e usare il client ID di un altro progetto
-> Cloud significa consumarne la quota e mostrare il nome altrui nella schermata
-> di consenso.
+> ### Cosa Evidentia non è
+>
+> **Non è un rilevatore di AI** e non dimostra chi abbia scritto un testo.
+> Non produce punteggi di sospetto, percentuali di "testo generato" né
+> attribuzioni di paternità — per scelta di progetto, non per limite tecnico.
+>
+> Rende osservabile *una parte* del processo di scrittura. L'interpretazione
+> resta un atto didattico, che spetta al docente.
 
-## Build e installazione
+## Perché
 
-```bash
-npm install
-npm run build          # → .output/chrome-mv3
-npm run build:edge     # → .output/edge-mv3
+Quando la domanda "come è nato questo testo?" si pone, di solito si hanno solo
+due cose: il testo finale e un'impressione. Gli strumenti che promettono di
+rilevare l'AI restituiscono un numero che non è verificabile, non è spiegabile
+allo studente e sbaglia in modi che colpiscono chi scrive in modo atipico.
+
+Intanto, un dato verificabile esiste già ed è ignorato: **SharePoint e Google
+Drive conservano le versioni successive di ogni documento**. Sono fatti
+osservabili, datati, attribuiti dal server, e il docente ha già il diritto di
+vederli. Sono solo scomodi da consultare, una versione alla volta.
+
+Evidentia parte da lì. Non aggiunge un giudizio: rende leggibile una traccia
+che c'era già, distinguendo sempre ciò che è **osservato** da ciò che è
+**derivato** per calcolo e da ciò che è una **stima**.
+
+Il risultato serve a una conversazione con lo studente — "vedo che il capitolo
+3 è comparso tutto insieme fra due versioni, raccontami come l'hai scritto" —
+non a emettere un verdetto.
+
+## Come funziona
+
+```mermaid
+flowchart LR
+    A["Documento dello studente<br/>SharePoint · OneDrive · Google Docs"]
+    B["Versioni conservate<br/>dal server"]
+    C["Testo di ogni versione<br/>estratto dal DOCX"]
+    D["Confronto e ricostruzione<br/>sedute · contenuti · gap"]
+    E["Process View<br/>report · export"]
+    A --> B --> C --> D --> E
 ```
 
-1. `chrome://extensions` (o `edge://extensions`) → modalità sviluppatore.
-2. "Carica estensione non pacchettizzata" → `.output/chrome-mv3`.
-3. Apri un documento Word su SharePoint/OneDrive o un documento Google Docs,
-   clicca l'icona di Evidentia → **Analizza cronologia versioni**. Per Google
-   la Process View chiede una volta il permesso per gli host Google e il
-   consenso OAuth.
+Nel dettaglio:
 
-### Sviluppo con ricarica automatica
+1. **Riconoscimento.** Dall'URL della scheda aperta, Evidentia capisce di quale
+   documento si tratta.
+2. **Lettura delle versioni.** Per SharePoint usa la API REST del sito con la
+   sessione Microsoft 365 già attiva del docente, in sola lettura. Per Google
+   Docs usa la API Drive con un token OAuth che il docente concede
+   esplicitamente e che è revocabile. Scarica ogni versione come DOCX e ne
+   estrae il testo.
+3. **Analisi.** Confronta le versioni fra loro e ricava sedute di lavoro, diff,
+   grandi inserimenti, riscritture, metriche, stime di tempo e ritmo, e i
+   **gap di osservazione** — gli intervalli in cui il server non ha conservato
+   nulla, dichiarati apertamente invece che nascosti.
+4. **Restituzione.** Interfaccia, report HTML, export per un LLM, dataset
+   completo in ZIP.
 
-```bash
-npm run dev            # Chrome con l'estensione caricata
-npm run dev:edge
-```
+### La regola che governa tutto
 
-Usa un profilo Chrome dedicato e persistente in `.wxt/chrome-profile` (il
-login Microsoft 365 resta fra un avvio e l'altro). Nota: Chrome disabilita
-le estensioni caricate da riga di comando se il profilo non ha la modalità
-sviluppatore attiva; `npm run dev` la pre-imposta (`scripts/prepare-dev-profile.mjs`).
-In dev mode è necessario che il processo `npm run dev` resti attivo.
+Ogni valore mostrato porta un'etichetta — **Osservato**, **Derivato**,
+**Stima** — e un'icona "i" con la sua definizione: che cosa significa, come è
+calcolato, come va letto. La scheda *Glossario* le raccoglie tutte, e le stesse
+definizioni viaggiano nei report e negli export.
 
-## Uso
+Il caso più importante è il tempo. **Il tempo di lavoro non è osservabile**: il
+server registra quando una versione è stata salvata, non quanto si è scritto.
+Evidentia lo stima (durata delle sedute più un margine di avvio, 5 minuti di
+default) e lo presenta sempre come stima, con le sue avvertenze. Un documento
+aperto senza modifiche, o il lavoro fatto fuori dal documento, non compaiono.
 
-- **Popup**: riconosce il documento dalla tab (SharePoint/OneDrive o Google Docs);
-  avvia o aggiorna l'analisi; export.
-- **Process View**: overview, timeline (parole per versione con sessioni,
-  grandi inserimenti, revisioni, intervalli lunghi), sessioni, **tempo
-  stimato** (tempo osservato e stimato per sessione e per giornata, parole
-  per ora), **contenuti per fase** (quali sezioni e paragrafi sono comparsi,
-  cambiati o scomparsi in ogni sessione; provenienza di ogni paragrafo del
-  testo finale; testo eliminato), versioni (seleziona due versioni per il
-  diff), grandi inserimenti, statistiche di revisione, gap di osservazione,
-  raw data, impostazioni.
+## Cosa mostra
 
-Ogni valore mostrato ha un'icona "i" con la sua definizione (significato,
-metodo di calcolo, come leggerlo) e l'etichetta Osservato / Derivato /
-Stima; la scheda **Glossario** le raccoglie tutte. Le stesse definizioni
-sono nei tooltip del report HTML, nel glossario e nelle legende del
-documento per Copilot, in `glossary.json` e nel campo `glossary` degli input
-JSON per LLM (sorgente unica: `src/analysis/glossary.ts`).
+<div align="center">
+  <img src="store/screenshots/2-timeline.png" alt="Timeline delle versioni con sedute e grandi inserimenti" width="800">
+</div>
 
-Il tempo attivo non è osservabile: la stima somma gli archi delle sessioni
-più un margine di avvio per sessione (default 5 minuti, modificabile) ed è
-sempre presentata come stima, con le sue avvertenze.
-- **Dati demo**: dalla barra laterale si caricano i casi A–E (scrittura
-  progressiva, grande inserimento, bozza + revisione, cronologia scarsa con
-  prima versione già completa, versioni non scaricabili).
+**Timeline** — parole per versione, con le sedute di lavoro, i grandi
+inserimenti, le revisioni e gli intervalli lunghi evidenziati.
 
-Se l'analisi risponde "HTTP 403 … unauthorized", la sessione Microsoft 365
-è scaduta: riapri il documento (login) e ripeti. Per Google Docs un 401/403
-significa consenso mancante o account senza accesso al documento: ripeti
-dal popup (il consenso viene richiesto di nuovo) o usa *Disconnetti Google*
-nelle impostazioni e riprova.
+<div align="center">
+  <img src="store/screenshots/3-contenuti-per-fase.png" alt="Contenuti comparsi, modificati ed eliminati in ogni fase" width="800">
+</div>
 
-## Export
+**Contenuti per fase** — quali sezioni e paragrafi sono comparsi, cambiati o
+scomparsi in ogni seduta; da dove viene ogni paragrafo del testo finale; cosa è
+stato eliminato lungo la strada.
 
-**Per Copilot / ChatGPT / Claude**: il pulsante *Esporta per Copilot / LLM
-(.docx)* produce un solo file Word con istruzioni, dati osservati (versioni,
-sessioni, tempo stimato e ritmo, evoluzione dei contenuti per fase, mappa del
-testo finale, testo eliminato, transizioni, inserimenti, revisioni, metriche),
-limiti e testo della versione corrente. Caricalo nella chat e scrivi "Segui le
-istruzioni contenute nel documento". Lo stesso contenuto è disponibile in
-Markdown (`.md`). Entrambi sono inclusi anche nello ZIP (`llm/analysis-for-llm.*`).
+<div align="center">
+  <img src="store/screenshots/4-confronto-versioni.png" alt="Diff fra due versioni" width="800">
+</div>
 
-**ZIP completo**: `document.json`, `versions.json`, `diffs.json`,
-`sessions.json`, `events.jsonl` (hash chain SHA-256), `metrics.json`,
-`timeline.json`, `observation.json`, `time-estimates.json`,
-`content-evolution.json`, `glossary.json`, `final.txt`, `llm/analysis-input.json`,
-`llm/analysis-input-compact.json`, `llm/analysis-prompt.md`,
-`report/process-report.html`, `README.txt`.
+**Confronto versioni** — il diff parola per parola fra due versioni qualsiasi.
 
-Per un'analisi con un LLM a partire dal JSON: copia il prompt da
-`llm/analysis-prompt.md` e allega `llm/analysis-input-compact.json`.
+<div align="center">
+  <img src="store/screenshots/5-gap-di-osservazione.png" alt="Gap di osservazione" width="800">
+</div>
 
-```bash
-npm run demo:export    # export dei casi demo → .output/demo-exports/<caso>/
-```
+**Gap di osservazione** — dove la cronologia è muta. È la scheda che impedisce
+di scambiare l'assenza di dati per assenza di lavoro.
 
-## Marchio e immagine coordinata
+Più: **overview**, **sedute**, **tempo stimato** (per seduta e per giornata,
+parole per ora), **grandi inserimenti**, **statistiche di revisione**, **raw
+data**, **glossario** e **impostazioni**.
 
-Il marchio "Fogli" (tre versioni di un documento una sull'altra) e tutti i
-formati derivati (SVG, PNG, favicon, tile per il Chrome Web Store, immagine
-Open Graph) sono in [brand/](brand/) con il relativo README. Si rigenerano
-da un'unica sorgente con `npm run brand:build`, che aggiorna anche le icone
-dell'estensione in `public/icon/`.
+## Export e uso con un LLM
 
-Il nome "Evidentia" e il marchio **non** sono coperti dalla licenza del codice
-(Apache-2.0, sezione 6): un fork è liberissimo di usare il codice, ma va
-distribuito con nome e marchio propri — soprattutto sul Chrome Web Store, dove
-un'estensione omonima confonderebbe gli utenti. Vedi [NOTICE](NOTICE).
+**Per Copilot, ChatGPT o Claude.** Il pulsante *Esporta per Copilot / LLM
+(.docx)* produce un unico file Word con istruzioni, dati osservati, limiti e
+testo della versione corrente. Si carica nella chat scrivendo "Segui le
+istruzioni contenute nel documento". Stesso contenuto anche in Markdown.
 
-## Sviluppo
+Il nome visualizzato degli autori **non compare mai** nell'input per LLM: le
+versioni sono attribuite a etichette pseudonime (`Autore 1`, `Autore 2`).
 
-```bash
-npm run typecheck
-npm test
-```
+**Dataset completo.** Un ZIP con versioni, diff, sedute, metriche, evoluzione
+dei contenuti, glossario, report HTML e una hash chain SHA-256 degli eventi.
+Contenuto e schema: [docs/development.md](docs/development.md) e
+[docs/data-model.md](docs/data-model.md).
 
-Struttura (`src/`): `sharepoint/` (locator + client REST), `google/`
-(locator, OAuth, client Drive API), `import/` (interfaccia comune
-`VersionSource`, locator unificato, importer), `docx/` (estrazione testo,
-usata da entrambe le sorgenti), `integrity/` (hash chain),
-`analysis/`, `storage/`, `export/`, `ui/`, `models/`, `utils/`, `demo/`.
-Nessun service worker e nessun content script: le pagine dell'estensione
-fanno tutto.
+## Privacy
+
+- **Solo in locale.** I dati restano in IndexedDB nel browser del docente. Le
+  uniche richieste di rete sono GET in sola lettura verso il server del
+  documento.
+- **Azione esplicita.** Nulla viene letto finché il docente non preme *Analizza
+  cronologia versioni*.
+- **Controllo.** Tutto ciò che è stato raccolto è ispezionabile (*Raw data*),
+  esportabile e cancellabile, per singolo documento o del tutto.
+- **Pseudonimizzazione.** Gli autori sono etichette più un hash SHA-256
+  dell'identità; il nome visualizzato si conserva solo in modalità FULL.
+- **Modalità METRICS_ONLY.** Analisi senza conservare il testo delle versioni:
+  solo conteggi e hash.
+
+Testo completo: [PRIVACY.md](PRIVACY.md).
 
 ## Limiti noti
 
-- Fra due versioni non è osservato nulla: niente digitazione, incolla, tempo attivo.
-- Il tempo di lavoro è una stima (archi delle sessioni + margine di avvio):
-  un documento aperto senza modifiche o il lavoro fuori dal documento non compaiono.
-- La provenienza dei paragrafi segue varianti con almeno il 50% di parole in
-  comune nello stesso ordine: riscritture radicali appaiono come paragrafo nuovo
-  più paragrafo eliminato.
-- Versioni cancellate o consolidate dal server non sono rilevabili. Per Google
-  Docs l'API Drive espone solo una parte delle revisioni, più rada della
-  cronologia dettagliata dell'editor.
-- L'autore di una versione è chi l'ha salvata, non necessariamente chi ha scritto.
-- La hash chain rileva alterazioni accidentali del dataset, non è una prova forense.
-- Nessun punteggio di sospetto né attribuzione dell'origine del testo: per scelta.
+Dichiarati qui perché condizionano ogni lettura dei risultati.
+
+- Fra due versioni non è osservato **nulla**: né digitazione, né incolla, né
+  tempo attivo.
+- Il tempo di lavoro è una **stima**, non una misura.
+- Versioni cancellate o consolidate dal server non sono recuperabili. L'API di
+  Google Drive espone solo una parte delle revisioni, più rada della cronologia
+  dettagliata che si vede nell'editor.
+- L'autore di una versione è **chi l'ha salvata**, non necessariamente chi ha
+  scritto.
+- La provenienza dei paragrafi segue le varianti con almeno il 50% di parole in
+  comune nello stesso ordine: una riscrittura radicale appare come paragrafo
+  nuovo più paragrafo eliminato.
+- La hash chain rileva alterazioni accidentali di un export. **Non è una prova
+  forense.**
+
+## Installazione
+
+L'estensione non è ancora sul Chrome Web Store. Per ora si installa da sorgente:
+
+```bash
+git clone https://github.com/leonardoangelini/evidentia.git
+cd evidentia
+npm install
+npm run build
+```
+
+Poi `chrome://extensions` (o `edge://extensions`) → modalità sviluppatore →
+*Carica estensione non pacchettizzata* → cartella `.output/chrome-mv3`.
+
+Apri un documento Word su SharePoint/OneDrive o un documento Google Docs,
+clicca l'icona di Evidentia → **Analizza cronologia versioni**.
+
+Per Google Docs serve un client ID OAuth: vedi
+[docs/google-docs.md](docs/google-docs.md). Se forki il progetto, registrane
+uno tuo.
+
+> **Preferisci guardare prima?** Apri la Process View e carica i **dati demo**
+> dalla barra laterale: cinque cronologie simulate, nessun documento reale.
+
+### Se qualcosa non funziona
+
+- **`HTTP 403 … unauthorized`** — la sessione Microsoft 365 è scaduta. Riapri
+  il documento per rifare il login e ripeti l'analisi.
+- **401/403 su Google Docs** — consenso mancante o account senza accesso al
+  documento. Ripeti dal popup, oppure usa *Disconnetti Google* nelle
+  impostazioni e riprova.
+
+## Documentazione
+
+| Documento | Contenuto |
+|---|---|
+| [docs/development.md](docs/development.md) | build, sviluppo, struttura del codice, test |
+| [docs/architecture.md](docs/architecture.md) | analisi dei requisiti, architettura, scelte di progetto |
+| [docs/data-model.md](docs/data-model.md) | modello dati e schema degli export |
+| [docs/sharepoint.md](docs/sharepoint.md) | API SharePoint, lettura del DOCX, limiti |
+| [docs/google-docs.md](docs/google-docs.md) | API Drive, OAuth, client ID, limiti delle revisioni |
+| [docs/release.md](docs/release.md) | CI/CD e pubblicazione sul Chrome Web Store |
+| [docs/store-listing.md](docs/store-listing.md) | testi della scheda Chrome Web Store |
+| [PRIVACY.md](PRIVACY.md) | principi, modalità FULL / METRICS_ONLY, permessi |
+| [brand/README.md](brand/README.md) | marchio, colori, file generati |
 
 ## Contribuire
 
 Segnalazioni, correzioni e discussioni sul metodo sono benvenute — anche da chi
-non scrive codice. Come partire, i vincoli di progetto da rispettare e i
-requisiti di una PR: [CONTRIBUTING.md](CONTRIBUTING.md).
+non scrive codice: un docente che descrive un caso reale in cui l'analisi
+risulta fuorviante è un contributo prezioso.
+
+Come partire, i vincoli di progetto da rispettare e i requisiti di una pull
+request: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Per una vulnerabilità non aprire una issue pubblica: [SECURITY.md](SECURITY.md).
 
@@ -181,8 +241,8 @@ Per una vulnerabilità non aprire una issue pubblica: [SECURITY.md](SECURITY.md)
 
 Uso, modifica e ridistribuzione sono liberi, anche commerciali, a condizione di
 mantenere avvisi di copyright e licenza, dichiarare le modifiche e includere il
-file [NOTICE](NOTICE). La licenza include una concessione esplicita di brevetto
-e non concede diritti sul marchio (vedi sopra).
+file [NOTICE](NOTICE).
 
-Font Manrope sotto SIL Open Font License 1.1 (`brand/src/fonts/OFL.txt`);
-licenze delle dipendenze in [NOTICE](NOTICE).
+Il nome "Evidentia" e il marchio **non** sono coperti dalla licenza del codice
+(Apache-2.0, sezione 6): un fork è libero di usare il codice, ma va distribuito
+con nome e marchio propri. Font Manrope sotto SIL Open Font License 1.1.

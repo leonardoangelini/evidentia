@@ -1,6 +1,6 @@
 # Scheda Chrome Web Store — testi pronti
 
-Da incollare nella dashboard al primo caricamento (vedi [RELEASE.md](RELEASE.md)).
+Da incollare nella dashboard al primo caricamento (vedi [release.md](release.md)).
 Listing in italiano, giustificazioni dei permessi in inglese: le legge un
 revisore Google.
 
@@ -122,7 +122,7 @@ valutare il merito creditizio).
 
 - **Icona 128×128**: `public/icon/128.png`
 - **Screenshot 1280×800**: cinque, già pronti in
-  [store/screenshots/](store/screenshots/), nell'ordine in cui caricarli.
+  [store/screenshots/](../store/screenshots/), nell'ordine in cui caricarli.
 
   | # | File | Cosa mostra |
   |---|---|---|
@@ -136,13 +136,13 @@ valutare il merito creditizio).
   rigenerarli dopo un cambio di interfaccia: `npm run build && npm run store:shots`
   (serve una volta `npx playwright-core install chromium` — Chrome stabile dalla
   137 ignora `--load-extension`, quindi lo script usa la build Chrome for Testing).
-- **Tile promozionale 440×280**: in [brand/](brand/).
+- **Tile promozionale 440×280**: in [brand/](../brand/).
 
 ## Da preparare prima
 
 **URL della privacy policy**: campo obbligatorio e deve essere pubblicamente
 raggiungibile. Con il repository pubblico su GitHub basta il permalink a
-[PRIVACY.md](PRIVACY.md):
+[PRIVACY.md](../PRIVACY.md):
 
     https://github.com/leonardoangelini/evidentia/blob/main/PRIVACY.md
 

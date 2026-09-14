@@ -6,7 +6,7 @@ import { defineConfig } from 'wxt';
  * Public key that pins the extension id of local builds (Google OAuth needs
  * one fixed redirect URI, https://<id>.chromiumapp.org/). Read from
  * WXT_EXTENSION_KEY (.env, git-ignored): absent in CI, so the Web Store ZIP
- * carries no key and gets the id assigned by the store. See GOOGLE_DOCS_NOTES.md.
+ * carries no key and gets the id assigned by the store. See docs/google-docs.md.
  */
 function extensionKey(): string | undefined {
   // A defined variable wins over .env, even when empty (WXT_EXTENSION_KEY= npm run zip → no key).

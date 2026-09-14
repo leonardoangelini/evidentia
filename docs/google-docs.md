@@ -166,7 +166,7 @@ revisioni vicine.
 L'esportazione DOCX di Google Docs usa gli stili `Heading 1…6` (id
 `Heading1`, nome `heading 1`): i titoli vengono riconosciuti dallo stesso
 estrattore di Word. Il resto (tabelle, revisioni tracciate, intestazioni
-escluse) segue [WORD_ONLINE_NOTES.md](WORD_ONLINE_NOTES.md) §4.
+escluse) segue [sharepoint.md](sharepoint.md) §4.
 
 ## 8. Verifica manuale consigliata
 

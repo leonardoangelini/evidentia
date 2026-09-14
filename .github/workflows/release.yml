@@ -5,7 +5,7 @@
 # configurati dei reviewer: l'equivalente del job manuale di GitLab CI.
 # Ogni submission entra nella review di Google, quindi il click è voluto.
 #
-# Secret e variabili richiesti: vedi RELEASE.md.
+# Secret e variabili richiesti: vedi docs/release.md.
 name: Release
 
 on:

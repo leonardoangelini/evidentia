@@ -3,7 +3,7 @@
 Come Evidentia legge la cronologia delle versioni di un documento Word su
 SharePoint Online / OneDrive for Business, cosa è affidabile, cosa non lo
 è. Il codice specifico è confinato in `src/sharepoint/` e `src/docx/`.
-Per Google Docs vedi [GOOGLE_DOCS_NOTES.md](GOOGLE_DOCS_NOTES.md).
+Per Google Docs vedi [google-docs.md](google-docs.md).
 
 ## 1. Come si riconosce il documento
 

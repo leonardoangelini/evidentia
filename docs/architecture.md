@@ -1,4 +1,4 @@
-# Evidentia — Implementation Plan
+# Evidentia — Architettura e scelte di progetto
 
 Evidentia è una browser extension (Manifest V3, Chrome/Edge) per **docenti**:
 apre la cronologia delle versioni che SharePoint/OneDrive conserva per un
@@ -6,7 +6,7 @@ documento Word e ne ricostruisce il processo di scrittura (versioni, diff,
 sessioni, metriche, gap di osservazione). Non è un AI detector: descrive
 **versioni osservate**, senza punteggi di sospetto.
 
-Documenti collegati: `DATA_MODEL.md`, `PRIVACY.md`, `WORD_ONLINE_NOTES.md`
+Documenti collegati: [`data-model.md`](data-model.md), [`../PRIVACY.md`](../PRIVACY.md), [`sharepoint.md`](sharepoint.md)
 (come vengono lette le versioni e con quali limiti).
 
 ---

@@ -70,7 +70,7 @@ export function createGoogleTokenProvider(clientId: string): TokenProvider {
 
   return {
     async get(interactive = true): Promise<string> {
-      if (!clientId) throw new GoogleAuthError('Google Docs: nessun client ID OAuth configurato. Inseriscilo nelle impostazioni di Evidentia (vedi GOOGLE_DOCS_NOTES.md).');
+      if (!clientId) throw new GoogleAuthError('Google Docs: nessun client ID OAuth configurato. Inseriscilo nelle impostazioni di Evidentia (vedi docs/google-docs.md).');
       const cached = await read();
       if (usable(cached)) return cached.accessToken;
       // Silent renewal first: no window if Google still has a session for the account.

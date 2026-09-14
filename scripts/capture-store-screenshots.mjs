@@ -1,6 +1,6 @@
 /**
  * Genera gli screenshot 1280x800 per la scheda del Chrome Web Store a partire
- * dai casi demo (nessun documento reale). Vedi STORE_LISTING.md.
+ * dai casi demo (nessun documento reale). Vedi docs/store-listing.md.
  *
  *   npm run build
  *   npx playwright-core install chromium     # una volta

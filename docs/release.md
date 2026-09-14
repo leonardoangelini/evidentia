@@ -1,8 +1,8 @@
 # Release — Chrome Web Store
 
-Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) esegue
+Workflow: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) esegue
 typecheck + test e produce lo ZIP come artefatto su ogni push e pull request.
-[`.github/workflows/release.yml`](.github/workflows/release.yml) pubblica, e
+[`.github/workflows/release.yml`](../.github/workflows/release.yml) pubblica, e
 parte solo su un tag `vX.Y.Z` (o a mano da *Actions → Run workflow*). Con dei
 reviewer configurati sull'environment `chrome-web-store` il rilascio resta
 **manuale**, perché ogni submission entra nella review di Google.
@@ -16,12 +16,12 @@ una. Il primo upload va fatto dalla dashboard.
 2. Build locale: `npm run zip` → `.output/evidentia-<version>-chrome.zip`.
 3. "Add new item", carica lo ZIP.
 4. Compila la scheda: descrizione, almeno **1 screenshot 1280×800**, icona 128
-   (`public/icon/128.png`), categoria, lingua, URL privacy. Testi pronti da
-   incollare: [STORE_LISTING.md](STORE_LISTING.md).
+   (`public/icon/128.png`, dalla radice del repository), categoria, lingua, URL privacy. Testi pronti da
+   incollare: [store-listing.md](store-listing.md).
 5. Sezione **Privacy practices**: dichiara l'uso di `storage`, `tabs`,
    `identity`, dei permessi host `*.sharepoint.com` e di quelli opzionali
    Google. Motiva ogni permesso — è la causa più frequente di rifiuto.
-   Contenuti utili: [PRIVACY.md](PRIVACY.md), [STORE_LISTING.md](STORE_LISTING.md).
+   Contenuti utili: [PRIVACY.md](../PRIVACY.md), [store-listing.md](store-listing.md).
 6. Pubblica e attendi la review.
 7. Annota dalla dashboard:
    - **Extension ID** (32 lettere, nell'URL della pagina dell'item)
@@ -80,7 +80,7 @@ Come **variabile** (scheda *Variables*, non è un segreto: finisce nel bundle):
 
 | Variabile | Valore |
 |---|---|
-| `WXT_GOOGLE_CLIENT_ID` (opzionale) | client ID OAuth compilato nella build per Google Docs; se assente, ogni docente lo inserisce nelle impostazioni. Vedi [GOOGLE_DOCS_NOTES.md](GOOGLE_DOCS_NOTES.md). |
+| `WXT_GOOGLE_CLIENT_ID` (opzionale) | client ID OAuth compilato nella build per Google Docs; se assente, ogni docente lo inserisce nelle impostazioni. Vedi [google-docs.md](google-docs.md). |
 
 La chiave PEM contiene a-capo: si conserva in base64 e il workflow la decodifica.
 
