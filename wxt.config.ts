@@ -71,7 +71,10 @@ export default defineConfig({
   manifestVersion: 3,
   manifest: {
     name: CHANNEL === 'production' ? 'Evidentia' : 'Evidentia (Testing)',
-    description: 'Learning process evidence: analyses the version history of a Word document on SharePoint or of a Google Docs document, locally. Not an AI detector.',
+    // Il Chrome Web Store rifiuta il pacchetto oltre i 132 caratteri: vedi il
+    // test in tests/manifest.test.ts. Traduce la descrizione breve della
+    // scheda, in docs/store-listing.md.
+    description: 'Reconstructs the writing process of a Word or Google Docs document from its version history, locally. Not an AI detector.',
     permissions: ['storage', 'tabs', 'identity'],
     host_permissions: SHAREPOINT_HOSTS,
     // Unica definizione: src/google/permissions.ts la riusa per chrome.permissions,
