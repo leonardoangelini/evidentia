@@ -143,8 +143,14 @@ attesa del tuo OK prima di caricare qualsiasi cosa. Su
 aspetterebbe un click e il senso dell'ambiente di sviluppo verrebbe meno.
 
 Limita anche i branch che possono usare ciascun environment (*Deployment
-branches*): `production` per l'uno, `main` per l'altro. Senza, un branch
-qualunque potrebbe pubblicare.
+branches*): `main` per `chrome-web-store-testing`, `production` **e `main`**
+per `chrome-web-store`. Senza, un branch qualunque potrebbe pubblicare.
+
+Il `main` di troppo su produzione non è una svista: *Release* in `dry_run` e
+*Store status* sull'item pubblico si lanciano da `main`, e con il solo
+`production` non partirebbero — si perderebbero i due modi di verificare la
+produzione senza pubblicare. Ciò che protegge quell'environment sono i
+*required reviewers*, non il branch: nessun deploy parte senza il click.
 
 > Su un repository pubblico i secret **non** sono esposti alle pull request
 > provenienti da un fork: GitHub non li passa. I workflow di deploy non
@@ -154,7 +160,8 @@ qualunque potrebbe pubblicare.
 
 ```sh
 git checkout main && git pull
-npm version patch          # alza package.json; crea anche un commit
+npm version patch --no-git-tag-version   # alza package.json, senza taggare
+git commit -am "chore: alza la version a $(node -p "require('./package.json').version")"
 git push
 
 git checkout production && git pull
@@ -168,6 +175,10 @@ workflow crea il tag `vX.Y.Z`.
 Il job `guard` rifiuta la release se esiste già il tag `v<version>`: è la
 rete contro il "ho dimenticato di alzare la version", che altrimenti si
 scoprirebbe solo quando lo store rigetta l'upload.
+
+Da qui il `--no-git-tag-version`: `npm version` da solo creerebbe anche il
+tag `vX.Y.Z`, cioè proprio quello la cui presenza fa fallire il `guard`. Il
+tag lo crea il workflow *dopo* la pubblicazione, ed è l'unico a doverlo fare.
 
 Prima di un rilascio delicato: *Actions → Release → Run workflow* con
 `dry_run` su `true`. Verifica credenziali e ZIP senza caricare nulla e senza
