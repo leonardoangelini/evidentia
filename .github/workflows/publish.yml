@@ -68,6 +68,24 @@ jobs:
           WXT_GOOGLE_CLIENT_ID: ${{ vars.WXT_GOOGLE_CLIENT_ID }}
         run: npm run zip
 
+      # Un fork non ha le credenziali dello store, e nemmeno questo repository
+      # le ha per un item non ancora creato: in quel caso il workflow
+      # costruisce e verifica, poi salta la pubblicazione con un avviso,
+      # invece di fallire in rosso a ogni push.
+      - name: Credenziali disponibili?
+        id: preflight
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          PRIVATE_KEY_B64: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$PRIVATE_KEY_B64" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Environment '${{ inputs.environment }}' senza credenziali del Chrome Web Store: pubblicazione saltata, lo ZIP resta fra gli artefatti. Vedi docs/release.md."
+          fi
+
       - name: Riepilogo del pacchetto
         run: |
           set -euo pipefail
@@ -81,9 +99,11 @@ jobs:
             echo "| version | $(node -p "require('./$MANIFEST').version") |"
             echo "| client ID OAuth nella build | $([ -n "${{ vars.WXT_GOOGLE_CLIENT_ID }}" ] && echo 'presente' || echo 'assente — la scuola usa il proprio') |"
             echo "| dry run | ${{ inputs.dry_run }} |"
+            echo "| pubblicazione | $([ '${{ steps.preflight.outputs.configured }}' = 'true' ] && echo 'sì' || echo 'saltata: environment senza credenziali') |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Pubblica
+        if: steps.preflight.outputs.configured == 'true'
         env:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
           CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
