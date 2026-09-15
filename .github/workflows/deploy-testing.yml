@@ -1,0 +1,44 @@
+# Ambiente di sviluppo: ogni push su main finisce sull'item "Evidentia
+# (Testing)" del Chrome Web Store, così chi prova ha sempre l'ultimo main
+# installato come estensione vera, non come cartella scompattata.
+#
+# È un item separato, con id e listing propri: non tocca in alcun modo
+# l'estensione pubblica. La promozione a produzione è un merge su
+# `production` (vedi release.yml).
+name: Deploy testing
+
+on:
+  push:
+    branches: [main]
+    # Un push che tocca solo documentazione non merita una submission.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'brand/**'
+      - 'store/**'
+      - 'LICENSE'
+      - 'NOTICE'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Verifica credenziali e ZIP senza caricare nulla'
+        type: boolean
+        default: false
+
+# Un push successivo rimpiazza il deploy precedente invece di accodarsi.
+concurrency:
+  group: deploy-testing
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  testing:
+    uses: ./.github/workflows/publish.yml
+    with:
+      environment: chrome-web-store-testing
+      channel: testing
+      cancel_pending: true
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit

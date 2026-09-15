@@ -4,11 +4,11 @@
  * disable the extension for existing users. They are requested from a
  * click in the Process View the first time a Google document is analysed.
  *
- * - www.googleapis.com: Drive API (file metadata, revision list, exports).
- * - docs.google.com: the revision export links returned by the Drive API
- *   point there. Requests carry the OAuth token only, never cookies.
+ * La lista degli origin sta in origins.ts, condivisa con il manifest.
  */
-export const GOOGLE_ORIGINS = ['https://www.googleapis.com/*', 'https://docs.google.com/*'];
+import { GOOGLE_ORIGINS } from './origins';
+
+export { GOOGLE_ORIGINS };
 
 export function hasGooglePermission(): Promise<boolean> {
   return new Promise((resolve) => chrome.permissions.contains({ origins: GOOGLE_ORIGINS }, (granted) => resolve(Boolean(granted))));

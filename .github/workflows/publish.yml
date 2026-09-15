@@ -1,0 +1,116 @@
+# Pubblicazione sul Chrome Web Store, in un solo posto.
+#
+# Non parte da sola: la invocano deploy-testing.yml (canale testing, da main)
+# e release.yml (canale production, dal branch production). Tutto ciò che
+# cambia fra i due ambienti è negli input e nei secret dell'environment,
+# così la procedura di rilascio è letteralmente la stessa per entrambi e
+# quello che si prova sul canale testing è quello che si pubblica.
+name: Publish (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'GitHub environment con i secret dell item di destinazione'
+        required: true
+        type: string
+      channel:
+        description: 'testing | production — decide nome e version del pacchetto'
+        required: true
+        type: string
+      dry_run:
+        description: 'Verifica credenziali e ZIP senza caricare nulla'
+        required: false
+        type: boolean
+        default: false
+      cancel_pending:
+        description: 'Annulla una review in sospeso prima di inviare (canale testing)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: ${{ inputs.channel }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+
+      - run: npm ci
+
+      # Un deploy verifica sempre, anche quando la CI ha già girato sullo
+      # stesso commit: il job di pubblicazione deve bastare a sé stesso.
+      - run: npm run typecheck
+
+      - run: npm test
+
+      # Nessun .env in CI: lo ZIP non contiene la chiave che fissa l'id
+      # dell'estensione, così ogni item usa l'id assegnato dallo store.
+      # WXT_GOOGLE_CLIENT_ID non è un segreto (finisce nel bundle: è un
+      # public client OAuth, senza client secret) ed è quindi una variabile
+      # d'environment, non un secret. Se assente, ogni scuola inserisce il
+      # proprio client ID nelle impostazioni di Evidentia.
+      - name: Build dello ZIP
+        env:
+          EVIDENTIA_CHANNEL: ${{ inputs.channel }}
+          # Quarta componente della version sul canale testing, che pubblica a
+          # ogni push: senza, il secondo upload verrebbe rifiutato come duplicato.
+          EVIDENTIA_BUILD_NUMBER: ${{ github.run_number }}
+          WXT_GOOGLE_CLIENT_ID: ${{ vars.WXT_GOOGLE_CLIENT_ID }}
+        run: npm run zip
+
+      - name: Riepilogo del pacchetto
+        run: |
+          set -euo pipefail
+          MANIFEST=.output/chrome-mv3/manifest.json
+          {
+            echo "| campo | valore |"
+            echo "|---|---|"
+            echo "| canale | \`${{ inputs.channel }}\` |"
+            echo "| environment | \`${{ inputs.environment }}\` |"
+            echo "| name | $(node -p "require('./$MANIFEST').name") |"
+            echo "| version | $(node -p "require('./$MANIFEST').version") |"
+            echo "| client ID OAuth nella build | $([ -n "${{ vars.WXT_GOOGLE_CLIENT_ID }}" ] && echo 'presente' || echo 'assente — la scuola usa il proprio') |"
+            echo "| dry run | ${{ inputs.dry_run }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pubblica
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          # La chiave del service account è conservata in base64: un secret di
+          # GitHub accetta gli a-capo del PEM, ma il base64 evita ogni
+          # ambiguità di quoting nello shell.
+          PRIVATE_KEY_B64: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          export CHROME_SERVICE_ACCOUNT_PRIVATE_KEY="$(echo "$PRIVATE_KEY_B64" | base64 -d)"
+          ZIP=$(ls .output/*-chrome.zip | head -n 1)
+          test -f "$ZIP" || { echo "ZIP non trovato in .output/"; exit 1; }
+          echo "ZIP: $ZIP"
+          ARGS=(--chrome-api-version v2 --chrome-zip "$ZIP")
+          # Il canale testing pubblica a ogni push: una nuova submission
+          # sostituisce quella ancora in review invece di accodarsi.
+          [ "${{ inputs.cancel_pending }}" = "true" ] && ARGS+=(--chrome-cancel-pending)
+          [ "${{ inputs.dry_run }}" = "true" ] && ARGS+=(--dry-run)
+          npx publish-extension "${ARGS[@]}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: evidentia-${{ inputs.channel }}-${{ github.sha }}
+          path: .output/*-chrome.zip
+          retention-days: 30
+          if-no-files-found: error
+          # .output/ inizia con un punto: senza questo, upload-artifact la
+          # tratta come nascosta, non trova nulla e il job fallisce.
+          include-hidden-files: true

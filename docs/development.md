@@ -123,7 +123,31 @@ rigenera. Dettagli in [brand/README.md](../brand/README.md).
 Chrome stabile dalla versione 137 ignora `--load-extension`, quindi lo script
 usa la build "Chrome for Testing".
 
+## Rami e ambienti
+
+| Branch | Ambiente | Cosa succede a ogni push |
+|---|---|---|
+| `main` | sviluppo | CI + deploy sull'item *Evidentia (Testing)* dello store |
+| `production` | produzione | Release sull'estensione pubblica, con approvazione |
+
+Si lavora su `main`; si rilascia alzando la `version` e promuovendo `main` su
+`production` con un merge fast-forward.
+
+### Variabili d'ambiente della build
+
+| Variabile | Effetto |
+|---|---|
+| `EVIDENTIA_CHANNEL` | `testing` (default) o `production`: nome visibile e `version` del pacchetto. Mai il codice |
+| `EVIDENTIA_BUILD_NUMBER` | quarta componente della version sul canale testing (in CI è il numero di run) |
+| `WXT_GOOGLE_CLIENT_ID` | client ID OAuth predefinito per Google Docs; le impostazioni lo sovrascrivono |
+| `WXT_EXTENSION_KEY` | chiave pubblica che fissa l'id delle build locali (assente in CI) |
+| `EVIDENTIA_OUT_DIR` | cartella di output alternativa, per costruire due varianti senza sovrascriversi |
+
+```bash
+EVIDENTIA_CHANNEL=production npm run zip   # pacchetto identico a quello pubblicato
+```
+
 ## Pubblicazione
 
-Vedi [release.md](release.md): secret, environment di approvazione e workflow
-di rilascio sul Chrome Web Store.
+Vedi [release.md](release.md): i due item sullo store, i secret dei due
+environment, l'approvazione manuale e il flusso di promozione.

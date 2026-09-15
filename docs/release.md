@@ -1,36 +1,94 @@
-# Release — Chrome Web Store
+# Release — due ambienti sul Chrome Web Store
 
-Workflow: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) esegue
-typecheck + test e produce lo ZIP come artefatto su ogni push e pull request.
-[`.github/workflows/release.yml`](../.github/workflows/release.yml) pubblica, e
-parte solo su un tag `vX.Y.Z` (o a mano da *Actions → Run workflow*). Con dei
-reviewer configurati sull'environment `chrome-web-store` il rilascio resta
-**manuale**, perché ogni submission entra nella review di Google.
+Evidentia esiste come **due item distinti** sullo store, alimentati dallo
+stesso repository:
 
-## 1. Primo caricamento — a mano, una volta sola
+| Ambiente | Branch | Item sullo store | Environment GitHub | Deploy |
+|---|---|---|---|---|
+| **dev / testing** | `main` | *Evidentia (Testing)* — unlisted | `chrome-web-store-testing` | automatico a ogni push |
+| **produzione** | `production` | *Evidentia* — pubblica | `chrome-web-store` | su merge, con approvazione |
+
+Sono due estensioni diverse per Chrome: id diversi, dati diversi,
+installabili affiancate nello stesso browser. Provare su testing non tocca
+in alcun modo chi ha installato la pubblica.
+
+Il pacchetto è lo stesso software in entrambi i casi: il canale
+(`EVIDENTIA_CHANNEL`) cambia solo il nome visibile e la `version` del
+manifest, mai il codice. Ciò che si prova sul canale testing è ciò che
+verrà pubblicato.
+
+## Flusso di lavoro
+
+```mermaid
+flowchart LR
+    A["commit su main"] --> B["CI: typecheck, test, ZIP"]
+    B --> C["Deploy testing<br/>Evidentia (Testing)"]
+    C --> D["prova manuale<br/>sul browser"]
+    D --> E["bump version<br/>+ merge su production"]
+    E --> F["Release: approvazione"]
+    F --> G["Evidentia<br/>pubblica"]
+```
+
+1. Si lavora su `main`. Ogni push esegue la CI e, se tocca il codice,
+   aggiorna l'item di testing sullo store.
+2. Si prova l'estensione di testing installata dal browser.
+3. Quando main è pronto: si alza la `version` in `package.json` e si
+   promuove `main` su `production`.
+4. Il workflow *Release* si ferma in attesa di approvazione, poi pubblica e
+   crea il tag `vX.Y.Z`.
+
+### Workflow
+
+| File | Ruolo |
+|---|---|
+| [`ci.yml`](../.github/workflows/ci.yml) | typecheck, test, ZIP di verifica su ogni push e PR. Non pubblica |
+| [`publish.yml`](../.github/workflows/publish.yml) | la procedura di pubblicazione, una sola volta; invocata dagli altri due |
+| [`deploy-testing.yml`](../.github/workflows/deploy-testing.yml) | push su `main` → item di testing |
+| [`release.yml`](../.github/workflows/release.yml) | push su `production` → item pubblico |
+| [`store-status.yml`](../.github/workflows/store-status.yml) | stato di un item, a scelta. Sola lettura |
+
+Testing e produzione passano dallo **stesso** `publish.yml`: la procedura di
+rilascio è provata a ogni push su main, non solo il giorno della release.
+
+## 1. Creare i due item — a mano, una volta sola
 
 L'API del Chrome Web Store aggiorna un'estensione esistente: non può crearne
-una. Il primo upload va fatto dalla dashboard.
+una. Il primo upload di **ciascun** item va fatto dalla dashboard
+<https://chrome.google.com/webstore/devconsole>.
 
-1. <https://chrome.google.com/webstore/devconsole> (account con i 5 $ già pagati).
-2. Build locale: `npm run zip` → `.output/evidentia-<version>-chrome.zip`.
-3. "Add new item", carica lo ZIP.
-4. Compila la scheda: descrizione, almeno **1 screenshot 1280×800**, icona 128
-   (`public/icon/128.png`, dalla radice del repository), categoria, lingua, URL privacy. Testi pronti da
-   incollare: [store-listing.md](store-listing.md).
-5. Sezione **Privacy practices**: dichiara l'uso di `storage`, `tabs`,
-   `identity`, dei permessi host `*.sharepoint.com` e di quelli opzionali
-   Google. Motiva ogni permesso — è la causa più frequente di rifiuto.
-   Contenuti utili: [PRIVACY.md](../PRIVACY.md), [store-listing.md](store-listing.md).
-6. Pubblica e attendi la review.
-7. Annota dalla dashboard:
-   - **Extension ID** (32 lettere, nell'URL della pagina dell'item)
-   - **Publisher ID** (dashboard → `Publisher → Settings`; è l'UUID che
-     compare anche nell'URL della devconsole)
+Per l'item di **testing**:
+
+1. `EVIDENTIA_CHANNEL=testing npm run zip` → `.output/evidentia-<version>-chrome.zip`
+   (il manifest dirà `Evidentia (Testing)`).
+2. "Add new item", carica lo ZIP.
+3. Scheda minima: bastano descrizione breve, uno screenshot e l'icona — non
+   deve attrarre nessuno.
+4. **Visibilità: Unlisted.** Raggiungibile solo da chi ha il link, non
+   compare nelle ricerche. In alternativa *Private* con i tester elencati.
+5. Annota **Extension ID** e la **chiave pubblica** (dashboard → *Package →
+   View public key*): quest'ultima va in `.env` come `WXT_EXTENSION_KEY`, così
+   le build locali hanno lo stesso id dell'item di testing e un solo redirect
+   URI OAuth da registrare.
+
+Per l'item di **produzione**: come sopra ma con
+`EVIDENTIA_CHANNEL=production`, visibilità *Public*, e la scheda completa —
+almeno **1 screenshot 1280×800**, icona 128, categoria, lingua, URL privacy.
+Testi pronti: [store-listing.md](store-listing.md).
+
+> Sezione **Privacy practices**: dichiara `storage`, `tabs`, `identity`, gli
+> host `*.sharepoint.com` e quelli opzionali Google, motivando ogni permesso.
+> È la causa più frequente di rifiuto. Materiale: [PRIVACY.md](../PRIVACY.md).
+
+Annota per entrambi:
+
+- **Extension ID** (32 lettere, nell'URL della pagina dell'item)
+- **Publisher ID** (dashboard → *Publisher → Settings*; lo stesso per i due item)
 
 ## 2. Service account Google (auth per la CI)
 
 Guida ufficiale: <https://developer.chrome.com/docs/webstore/service-accounts>
+
+Uno solo, valido per entrambi gli item: appartiene al publisher, non all'item.
 
 1. Crea/usa un progetto su <https://console.cloud.google.com>.
 2. Abilita la **Chrome Web Store API**.
@@ -38,49 +96,38 @@ Guida ufficiale: <https://developer.chrome.com/docs/webstore/service-accounts>
    (nella guida: sezione "Obtain access tokens" → "Use a JSON Web Token";
    fermati dopo il download).
 4. Nella dashboard del Web Store, sezione **Account**, incolla l'email del
-   service account nel campo dedicato e salva. È questo passo a concedere
-   l'accesso all'API — non serve un group publisher, ma si può collegare **un
-   solo service account per publisher**. Se manca, la API risponde
-   `403 PERMISSION_DENIED` su `publishers/<id>/items/<id>` anche quando il
-   token OAuth viene emesso correttamente.
-5. Dal JSON servono `client_email` e `private_key`.
+   service account e dagli accesso.
 
-### Fallback: API v1.1 (OAuth refresh token)
+## 3. Configurare i due environment
 
-Deprecata da Google ma ancora funzionante, e non richiede di collegare un
-service account al publisher: autentica come utente.
-Si crea un OAuth client "Desktop app" nel progetto Cloud, si ottiene un refresh
-token con `npx publish-extension init` e si usano queste variabili al posto di
-publisher ID + service account:
+`Settings → Environments`. Servono **`chrome-web-store-testing`** e
+**`chrome-web-store`**.
 
-| Variabile | Note |
-|---|---|
-| `CHROME_CLIENT_ID` | OAuth client |
-| `CHROME_CLIENT_SECRET` | OAuth client |
-| `CHROME_REFRESH_TOKEN` | dal flow di `init` |
+Quasi tutte le credenziali sono condivise: conviene metterle come **secret di
+repository** e sovrascrivere nell'environment solo ciò che cambia. Un secret
+d'environment vince su quello di repository con lo stesso nome.
 
-Nel workflow si toglie `--chrome-api-version v2` e la riga che decodifica la
-chiave base64. Attenzione: se la schermata di consenso OAuth resta in
-"Testing", il refresh token scade dopo 7 giorni — va messa "In production".
-
-## 3. Secret e variabili su GitHub
-
-`Settings → Secrets and variables → Actions`.
-
-Come **secret** (scheda *Secrets*):
+Secret di **repository** (uguali per i due ambienti):
 
 | Secret | Valore |
 |---|---|
-| `CHROME_EXTENSION_ID` | ID dell'item dal punto 1 |
-| `CHROME_PUBLISHER_ID` | Publisher ID dal punto 1 |
+| `CHROME_PUBLISHER_ID` | Publisher ID |
 | `CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL` | `client_email` del JSON |
 | `CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64` | `private_key` in base64 (vedi sotto) |
 
-Come **variabile** (scheda *Variables*, non è un segreto: finisce nel bundle):
+Secret di **environment** (diverso per ciascuno):
+
+| Secret | `chrome-web-store-testing` | `chrome-web-store` |
+|---|---|---|
+| `CHROME_EXTENSION_ID` | id dell'item di testing | id dell'item pubblico |
+
+Variabile di **environment** (scheda *Variables*; non è un segreto — il client
+ID OAuth finisce nel bundle ed è pubblico per definizione, un public client
+non ha client secret):
 
 | Variabile | Valore |
 |---|---|
-| `WXT_GOOGLE_CLIENT_ID` (opzionale) | client ID OAuth compilato nella build per Google Docs; se assente, ogni docente lo inserisce nelle impostazioni. Vedi [google-docs.md](google-docs.md). |
+| `WXT_GOOGLE_CLIENT_ID` (opzionale) | client ID OAuth compilato nella build per Google Docs. Se assente, ogni scuola inserisce il proprio nelle impostazioni. Vedi [google-docs.md](google-docs.md) |
 
 La chiave PEM contiene a-capo: si conserva in base64 e il workflow la decodifica.
 
@@ -88,33 +135,55 @@ La chiave PEM contiene a-capo: si conserva in base64 e il workflow la decodifica
 node -p "Buffer.from(require('./sa.json').private_key).toString('base64')"
 ```
 
-### Approvazione manuale del rilascio
+### Approvazione manuale della produzione
 
-`Settings → Environments → New environment` → `chrome-web-store`, poi
-*Required reviewers* con te stesso. Il job di release si ferma in attesa del
-tuo OK prima di caricare qualsiasi cosa. Senza environment il rilascio sul tag
-parte senza conferma: con un repo pubblico e i secret in gioco, conviene
-configurarlo.
+Su `chrome-web-store`, *Required reviewers* con te stesso: il job si ferma in
+attesa del tuo OK prima di caricare qualsiasi cosa. Su
+`chrome-web-store-testing` **non** metterli, altrimenti ogni push su main
+aspetterebbe un click e il senso dell'ambiente di sviluppo verrebbe meno.
+
+Limita anche i branch che possono usare ciascun environment (*Deployment
+branches*): `production` per l'uno, `main` per l'altro. Senza, un branch
+qualunque potrebbe pubblicare.
 
 > Su un repository pubblico i secret **non** sono esposti alle pull request
-> provenienti da un fork: GitHub non li passa. Il workflow di release non gira
-> comunque sulle PR, solo sui tag e su `workflow_dispatch`.
+> provenienti da un fork: GitHub non li passa. I workflow di deploy non
+> girano comunque sulle PR.
 
-## 4. Rilasciare una versione
+## 4. Rilasciare in produzione
 
 ```sh
-npm version patch          # aggiorna package.json (e la version del manifest)
-git push && git push --tags
+git checkout main && git pull
+npm version patch          # alza package.json; crea anche un commit
+git push
+
+git checkout production && git pull
+git merge --ff-only main
+git push                   # avvia Release
 ```
 
-Il push del tag avvia il workflow *Release*; se l'environment ha dei reviewer,
-approva da *Actions* o dalla notifica. Il job rifiuta il rilascio se il tag non
-corrisponde alla `version` di `package.json` — il Web Store rigetta un upload
-con una version già usata.
+Poi approva da *Actions* o dalla notifica. A pubblicazione avvenuta il
+workflow crea il tag `vX.Y.Z`.
 
-Prima del primo rilascio conviene una prova a vuoto: *Actions → Release → Run
-workflow*, lasciando `dry_run` su `true`. Verifica credenziali e ZIP senza
-caricare nulla.
+Il job `guard` rifiuta la release se esiste già il tag `v<version>`: è la
+rete contro il "ho dimenticato di alzare la version", che altrimenti si
+scoprirebbe solo quando lo store rigetta l'upload.
+
+Prima di un rilascio delicato: *Actions → Release → Run workflow* con
+`dry_run` su `true`. Verifica credenziali e ZIP senza caricare nulla e senza
+creare tag.
+
+## 5. Versioni
+
+- **Produzione**: `X.Y.Z`, da `package.json`.
+- **Testing**: `X.Y.Z.<numero di run>` — lo store rifiuta un upload con una
+  version già presente sull'item, e il canale testing pubblica a ogni push.
+  `version_name` mostra `X.Y.Z testing <n>` nella pagina delle estensioni.
+
+Le due sequenze sono indipendenti: sono item diversi.
+
+Il canale testing passa `--chrome-cancel-pending`: un nuovo push annulla la
+submission ancora in review invece di accodarsi.
 
 ## Note
 
@@ -125,3 +194,5 @@ caricare nulla.
 - La versione di Node nei workflow (`26`) va tenuta allineata a quella di
   sviluppo; il minimo supportato è dichiarato in `engines` di `package.json`.
 - Per caricare senza sottomettere a review: `--chrome-skip-submit-review`.
+- Un push su `main` che tocca solo documentazione non fa partire un deploy
+  (vedi `paths-ignore` in `deploy-testing.yml`).
