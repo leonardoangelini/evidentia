@@ -10,6 +10,7 @@ a partire dalla cronologia delle versioni che il server conserva già.**
 
 [![CI](https://github.com/leonardoangelini/evidentia/actions/workflows/ci.yml/badge.svg)](https://github.com/leonardoangelini/evidentia/actions/workflows/ci.yml)
 [![Licenza: Apache 2.0](https://img.shields.io/badge/licenza-Apache%202.0-blue.svg)](LICENSE)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-installa-1D4ED8.svg?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/evidentia/fageecgkjgamdlmnbbfcploimdjdlbko)
 [![Manifest V3](https://img.shields.io/badge/Chrome%20%2F%20Edge-Manifest%20V3-1D4ED8.svg)](#installazione)
 
 </div>
@@ -180,7 +181,19 @@ Dichiarati qui perché condizionano ogni lettura dei risultati.
 
 ## Installazione
 
-L'estensione non è ancora sul Chrome Web Store. Per ora si installa da sorgente:
+Evidentia è pubblicata sul Chrome Web Store:
+
+**➜ [Installa Evidentia](https://chromewebstore.google.com/detail/evidentia/fageecgkjgamdlmnbbfcploimdjdlbko)**
+
+Funziona su Chrome e sui browser basati su Chromium (Edge, Brave, Vivaldi:
+apri il link con quel browser e consenti l'installazione da Chrome Web Store).
+
+Apri un documento Word su SharePoint/OneDrive o un documento Google Docs,
+clicca l'icona di Evidentia → **Analizza cronologia versioni**.
+
+### Installazione da sorgente
+
+Per sviluppare o per provare una versione non ancora pubblicata:
 
 ```bash
 git clone https://github.com/leonardoangelini/evidentia.git
@@ -192,12 +205,10 @@ npm run build
 Poi `chrome://extensions` (o `edge://extensions`) → modalità sviluppatore →
 *Carica estensione non pacchettizzata* → cartella `.output/chrome-mv3`.
 
-Apri un documento Word su SharePoint/OneDrive o un documento Google Docs,
-clicca l'icona di Evidentia → **Analizza cronologia versioni**.
-
-Per Google Docs serve un client ID OAuth: vedi
-[docs/google-docs.md](docs/google-docs.md). Se forki il progetto, registrane
-uno tuo.
+Una build da sorgente ha un ID estensione diverso da quello pubblicato, quindi
+per Google Docs serve un client ID OAuth proprio: vedi
+[docs/google-docs.md](docs/google-docs.md). Chi installa dal Chrome Web Store
+non deve configurare nulla.
 
 > **Preferisci guardare prima?** Apri la Process View e carica i **dati demo**
 > dalla barra laterale: cinque cronologie simulate, nessun documento reale.
