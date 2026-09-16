@@ -18,6 +18,10 @@ stats.html
 sa.json
 service-account*.json
 key.pem
+# Google Cloud nomina la chiave scaricata <progetto>-<id chiave>.json, che i
+# pattern qui sopra non coprono: è finita in staging una volta, la push
+# protection di GitHub l'ha fermata sul filo.
+evidentia-*.json
 
 # Export ed esperimenti locali: possono contenere documenti reali.
 demo-exports/
