@@ -39,6 +39,11 @@ repository, nelle issue o nelle PR.
 - Nessun dato reale nei test: usa `contoso.sharepoint.com`, nomi di fantasia,
   identificativi inventati. Guarda `tests/locator.test.ts` come riferimento.
 - Commit in inglese o in italiano, purché il messaggio dica *perché*.
+- Se la modifica si vede (interfaccia, popup, export, permessi, analisi):
+  voce nuova in cima a `CHANGELOG.md` **e** `version` alzata in `package.json`
+  e `package-lock.json`, nella stessa PR. Il test `tests/changelog.test.ts`
+  fallisce se le due divergono; il push su `main` con la version nuova
+  pubblica sullo store ([docs/release.md](docs/release.md)).
 
 ## Vincoli di progetto da rispettare
 

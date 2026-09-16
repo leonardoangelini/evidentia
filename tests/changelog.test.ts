@@ -53,6 +53,15 @@ Prima versione con le cartelle.
     expect(entryFor(version), `CHANGELOG.md non ha una voce per la version ${version} di package.json`).not.toBeNull();
   });
 
+  it('has package.json at the version of its latest entry', () => {
+    // Le due si muovono insieme: una voce nuova nel CHANGELOG senza il bump di
+    // `version` resterebbe invisibile nella scheda Info e non verrebbe mai
+    // pubblicata; il bump senza la voce è coperto dal test precedente.
+    const version = JSON.parse(readFileSync('package.json', 'utf-8')).version as string;
+    const latest = changelog()[0]?.version;
+    expect(version, `CHANGELOG.md documenta la ${latest} ma package.json è ancora alla ${version}: alza la version`).toBe(latest);
+  });
+
   it('splits the inline markdown a bullet may use', () => {
     expect(inlineSegments('Nuova scheda **Info**: modalità `METRICS_ONLY`.')).toEqual([
       { text: 'Nuova scheda ', style: 'plain' },
