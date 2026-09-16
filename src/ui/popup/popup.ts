@@ -4,6 +4,7 @@ import { formatDateTime } from '@/utils/time';
 import { clear, h } from '@/ui/shared/dom';
 import { exportDocument, exportLlmDocument } from '@/ui/shared/export-action';
 import { logoMark } from '@/ui/shared/logo';
+import { getVersionLabel } from '@/utils/version';
 
 async function activeTab(): Promise<chrome.tabs.Tab | null> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -63,6 +64,7 @@ export function mountPopup(root: HTMLElement): void {
       h('a', { href: '#', onclick: (e: Event) => { e.preventDefault(); openPage('process-view.html#settings'); } }, 'Impostazioni'),
       ' · ',
       h('a', { href: '#', onclick: (e: Event) => { e.preventDefault(); openPage('process-view.html'); } }, 'Tutti i documenti'),
+      h('div', { class: 'version' }, `v${getVersionLabel()}`),
     );
 
   const doExport = async (run: () => Promise<string>): Promise<void> => {

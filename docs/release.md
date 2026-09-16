@@ -214,6 +214,12 @@ senza creare tag, e gira anche su una version già pubblicata.
 
 Le due sequenze sono indipendenti: sono item diversi.
 
+La version installata si legge anche dentro l'estensione, senza passare dalla
+pagina delle estensioni del browser: in fondo al popup e sotto il titolo nella
+barra laterale della Process View. Su una build di testing è la stessa stringa
+di `version_name`, numero di build compreso, così una segnalazione dice sempre
+quale pacchetto era installato.
+
 Il canale testing passa `--chrome-cancel-pending`: un nuovo push annulla la
 submission ancora in review invece di accodarsi.
 

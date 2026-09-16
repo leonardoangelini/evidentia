@@ -13,7 +13,7 @@ import { documentRepository, importDataset, loadDataset } from '@/storage/reposi
 import { loadSettings, saveSettings } from '@/storage/settings-store';
 import { formatInt } from '@/utils/text';
 import { formatDateTime, formatDuration } from '@/utils/time';
-import { getExtensionVersion } from '@/utils/version';
+import { getExtensionVersion, getVersionLabel } from '@/utils/version';
 import { badge, clear, h, html } from '@/ui/shared/dom';
 import { logoMark } from '@/ui/shared/logo';
 import { exportDocument, exportLlmDocument } from '@/ui/shared/export-action';
@@ -203,6 +203,7 @@ export function mountProcessView(root: HTMLElement): void {
     clear(sidebar);
     sidebar.appendChild(h('div', { class: 'brand' }, logoMark(20), 'EVIDENTIA'));
     sidebar.appendChild(h('div', { class: 'muted small' }, 'Process View · cronologia versioni'));
+    sidebar.appendChild(h('div', { class: 'muted small version' }, `v${getVersionLabel()}`));
     sidebar.appendChild(h('h3', {}, 'Documenti analizzati'));
     if (state.documents.length === 0) sidebar.appendChild(h('p', { class: 'muted small' }, 'Nessun documento analizzato.'));
     for (const d of state.documents) {
