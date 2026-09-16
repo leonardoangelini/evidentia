@@ -1,6 +1,6 @@
 # Verifica su ogni push e pull request: typecheck, test, build dello ZIP.
-# Non pubblica: il deploy sull'item di testing è in deploy-testing.yml,
-# quello sull'estensione pubblica in release.yml, su un bump di version.
+# Non pubblica: la pubblicazione sull'estensione è in release.yml, su un
+# bump di version.
 name: CI
 
 on:
@@ -51,7 +51,8 @@ jobs:
 
       # Nessun .env in CI: la build non contiene la chiave che fissa l'id
       # dell'estensione, così lo store assegna il proprio. Vedi wxt.config.ts.
-      # Canale testing: questo ZIP è un artefatto di verifica, non un rilascio.
+      # Canale testing: questo ZIP è un artefatto di verifica da installare
+      # scompattato, non un rilascio, e non deve assumere l'identità pubblica.
       - run: npm run zip
         env:
           EVIDENTIA_CHANNEL: testing

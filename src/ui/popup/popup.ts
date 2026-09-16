@@ -64,7 +64,8 @@ export function mountPopup(root: HTMLElement): void {
       h('a', { href: '#', onclick: (e: Event) => { e.preventDefault(); openPage('process-view.html#settings'); } }, 'Impostazioni'),
       ' · ',
       h('a', { href: '#', onclick: (e: Event) => { e.preventDefault(); openPage('process-view.html'); } }, 'Tutti i documenti'),
-      h('div', { class: 'version' }, `v${getVersionLabel()}`),
+      // La version porta alla scheda Info: novità, licenza, contatti.
+      h('a', { class: 'version', href: '#', title: 'Versione installata · novità e informazioni', onclick: (e: Event) => { e.preventDefault(); openPage('process-view.html#about'); } }, `v${getVersionLabel()}`),
     );
 
   const doExport = async (run: () => Promise<string>): Promise<void> => {

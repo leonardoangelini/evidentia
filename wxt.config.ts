@@ -4,14 +4,15 @@ import { defineConfig } from 'wxt';
 import { GOOGLE_ORIGINS } from './src/google/origins';
 
 /**
- * Canale di build. `testing` e `production` sono due item distinti sul Chrome
- * Web Store: id diversi, quindi redirect URI OAuth diversi e installazioni
- * affiancabili nello stesso browser. Il canale cambia solo l'identità del
- * pacchetto (nome visibile e version), mai il codice: ciò che si prova sul
- * canale testing è esattamente ciò che si pubblica.
+ * Canale di build. `production` è il pacchetto che va sul Chrome Web Store;
+ * `testing` è la stessa cosa con un'altra identità (nome visibile e version),
+ * per le build locali e per l'artefatto di verifica della CI, che si
+ * installano scompattate accanto all'estensione pubblica senza confondersi
+ * con lei. Il canale non cambia mai il codice: ciò che si prova in locale è
+ * esattamente ciò che si pubblica.
  *
  * Default `testing`, così una build locale non assume per sbaglio l'identità
- * di produzione. La CI lo imposta esplicitamente (vedi .github/workflows/).
+ * di produzione. Il rilascio lo imposta esplicitamente (vedi release.yml).
  */
 const CHANNELS = ['testing', 'production'] as const;
 type Channel = (typeof CHANNELS)[number];
@@ -25,11 +26,11 @@ function channel(): Channel {
 const CHANNEL = channel();
 
 /**
- * Il Chrome Web Store rifiuta un upload con una version già presente
- * sull'item. Su produzione la version è quella di package.json, promossa a
- * mano; sul canale testing si pubblica a ogni push, quindi il numero di run
- * della CI diventa la quarta componente (Chrome ne ammette fino a quattro).
- * `version_name` resta leggibile nella pagina delle estensioni.
+ * Su produzione la version è quella di package.json, promossa a mano. Sul
+ * canale testing il numero di run della CI diventa la quarta componente
+ * (Chrome ne ammette fino a quattro), così due artefatti costruiti dalla
+ * stessa version restano distinguibili; `version_name` resta leggibile nella
+ * pagina delle estensioni.
  */
 function versionFields(): { version?: string; version_name?: string } {
   const base = JSON.parse(readFileSync('package.json', 'utf-8')).version as string;
@@ -42,8 +43,9 @@ function versionFields(): { version?: string; version_name?: string } {
  * Public key that pins the extension id of local builds (Google OAuth needs
  * one fixed redirect URI, https://<id>.chromiumapp.org/). Read from
  * WXT_EXTENSION_KEY (.env, git-ignored): absent in CI, so the Web Store ZIP
- * carries no key and gets the id assigned by the store. In locale conviene la
- * chiave dell'item **testing**, non quella di produzione. See docs/google-docs.md.
+ * carries no key and gets the id assigned by the store. Genera la tua coppia
+ * di chiavi (vedi .env.example): l'id che ne deriva è quello da registrare
+ * come redirect URI di sviluppo. See docs/google-docs.md.
  */
 function extensionKey(): string | undefined {
   // A defined variable wins over .env, even when empty (WXT_EXTENSION_KEY= npm run zip → no key).

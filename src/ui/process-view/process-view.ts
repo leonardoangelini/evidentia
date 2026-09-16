@@ -13,13 +13,14 @@ import { documentRepository, importDataset, loadDataset } from '@/storage/reposi
 import { loadSettings, saveSettings } from '@/storage/settings-store';
 import { formatInt } from '@/utils/text';
 import { formatDateTime, formatDuration } from '@/utils/time';
+import { changelog, entryFor, inlineSegments, type ChangelogEntry } from '@/utils/changelog';
 import { getExtensionVersion, getVersionLabel } from '@/utils/version';
-import { badge, clear, h, html } from '@/ui/shared/dom';
+import { badge, clear, h, html, type Child } from '@/ui/shared/dom';
 import { logoMark } from '@/ui/shared/logo';
 import { exportDocument, exportLlmDocument } from '@/ui/shared/export-action';
 import { renderSnapshotComparison } from './diff-view';
 
-type TabId = 'overview' | 'timeline' | 'sessions' | 'time' | 'content' | 'versions' | 'insertions' | 'revisions' | 'gaps' | 'raw' | 'glossary' | 'settings';
+type TabId = 'overview' | 'timeline' | 'sessions' | 'time' | 'content' | 'versions' | 'insertions' | 'revisions' | 'gaps' | 'raw' | 'glossary' | 'settings' | 'about';
 const TABS: Array<[TabId, string]> = [
   ['overview', 'Overview'],
   ['timeline', 'Timeline'],
@@ -33,7 +34,11 @@ const TABS: Array<[TabId, string]> = [
   ['raw', 'Raw data'],
   ['glossary', 'Glossario'],
   ['settings', 'Settings'],
+  ['about', 'Info'],
 ];
+
+/** Repository pubblico: l'unica fonte di codice, licenza, privacy e segnalazioni. */
+const REPO_URL = 'https://github.com/leonardoangelini/evidentia';
 
 interface State {
   documents: AnalyzedDocument[];
@@ -176,6 +181,7 @@ export function mountProcessView(root: HTMLElement): void {
     if (state.message) main.appendChild(h('div', { class: 'notice' }, state.message));
     if (state.tab === 'settings') return void main.appendChild(renderSettings());
     if (state.tab === 'glossary') return void main.appendChild(renderGlossary());
+    if (state.tab === 'about') return void main.appendChild(renderAbout());
     if (!state.dataset || !state.analysis) {
       main.appendChild(h('p', { class: 'muted', style: 'padding:24px 0' }, 'Nessun documento selezionato. Apri un documento Word su SharePoint/OneDrive o un documento Google Docs e avvia l\'analisi dal popup, oppure carica un caso demo dalla barra laterale.'));
       return;
@@ -195,6 +201,7 @@ export function mountProcessView(root: HTMLElement): void {
       raw: () => renderRaw(ds, an),
       glossary: () => renderGlossary(),
       settings: () => renderSettings(),
+      about: () => renderAbout(),
     };
     main.appendChild(section[state.tab]());
   }
@@ -203,7 +210,6 @@ export function mountProcessView(root: HTMLElement): void {
     clear(sidebar);
     sidebar.appendChild(h('div', { class: 'brand' }, logoMark(20), 'EVIDENTIA'));
     sidebar.appendChild(h('div', { class: 'muted small' }, 'Process View · cronologia versioni'));
-    sidebar.appendChild(h('div', { class: 'muted small version' }, `v${getVersionLabel()}`));
     sidebar.appendChild(h('h3', {}, 'Documenti analizzati'));
     if (state.documents.length === 0) sidebar.appendChild(h('p', { class: 'muted small' }, 'Nessun documento analizzato.'));
     for (const d of state.documents) {
@@ -225,6 +231,9 @@ export function mountProcessView(root: HTMLElement): void {
     sidebar.appendChild(h('h3', {}, 'Privacy'));
     sidebar.appendChild(h('p', { class: 'muted small' }, 'Tutti i dati restano in questo browser. Le versioni sono lette con la tua sessione Microsoft 365, in sola lettura. Nessun server, nessuna telemetria.'));
     sidebar.appendChild(h('button', { class: 'danger full small', onclick: () => void deleteAll() }, 'Elimina tutti i dati'));
+    // In fondo, staccata: la version non è un comando, è l'etichetta di ciò
+    // che è installato. Porta alla scheda Info, dove sta il resto.
+    sidebar.appendChild(h('button', { class: 'version', title: 'Versione installata · apri la scheda Info', onclick: () => setTab('about') }, `v${getVersionLabel()}`));
   }
 
   async function doExport(run: () => Promise<string>): Promise<void> {
@@ -688,6 +697,64 @@ export function mountProcessView(root: HTMLElement): void {
     }
     return el;
   }
+
+  /** Link esterno: si apre in una scheda nuova e non passa il referrer. */
+  function link(href: string, label: string): HTMLElement {
+    return h('a', { href, target: '_blank', rel: 'noreferrer noopener' }, label);
+  }
+
+  /** Una voce del changelog, con il poco markdown che usa reso in DOM. */
+  function entryLine(text: string): Child[] {
+    return inlineSegments(text).map((seg) => (seg.style === 'strong' ? h('strong', {}, seg.text) : seg.style === 'code' ? h('code', { class: 'mono' }, seg.text) : seg.text));
+  }
+
+  function changes(entry: ChangelogEntry): HTMLElement {
+    return h('div', {}, entry.intro ? h('p', {}, ...entryLine(entry.intro)) : null, entry.changes.length > 0 ? h('ul', {}, ...entry.changes.map((c) => h('li', {}, ...entryLine(c)))) : null);
+  }
+
+  /**
+   * Scheda Info: che cos'è Evidentia, che cosa è cambiato, chi la fa. Le note
+   * di versione vengono da CHANGELOG.md incluso nel pacchetto, quindi si
+   * leggono anche senza rete, come tutto il resto dell'estensione.
+   */
+  function renderAbout(): HTMLElement {
+    const el = h('section', { class: 'about' });
+    const entries = changelog();
+    // Sul canale testing la version del manifest ha una quarta componente:
+    // l'etichetta la mostra per intero, le note vengono dalla release di base.
+    const current = entryFor(getExtensionVersion(), entries);
+
+    el.appendChild(h('div', { class: 'about-head' }, logoMark(40), h('div', {}, h('div', { class: 'about-name' }, 'EVIDENTIA'), h('div', { class: 'muted' }, `versione ${getVersionLabel()}`))));
+    el.appendChild(h('p', { class: 'lead' }, 'Rende visibile il processo con cui un testo è stato scritto, a partire dalla cronologia delle versioni che il server conserva già — Word su SharePoint e OneDrive, Google Docs attraverso le revisioni di Google Drive.'));
+    el.appendChild(h('div', { class: 'notice' }, h('strong', {}, 'Evidentia non è un rilevatore di AI.'), ' Non dimostra chi abbia scritto un testo e non dimostra l\'uso di un modello linguistico. Mostra che cosa il server ha conservato del percorso di scrittura, e dichiara accanto ciò che non può mostrare. Il tempo è sempre una stima, mai un\'osservazione.'));
+
+    el.appendChild(h('h2', {}, 'Novità di questa versione'));
+    if (current) el.appendChild(changes(current));
+    else el.appendChild(h('p', { class: 'muted' }, 'Questa build non ha note di versione: è una build di sviluppo, costruita fra una release e l\'altra.'));
+
+    const previous = entries.filter((e) => e !== current);
+    if (previous.length > 0) {
+      el.appendChild(h('h2', {}, 'Versioni precedenti'));
+      for (const e of previous) {
+        el.appendChild(h('details', {}, h('summary', {}, `${e.version}${e.date ? ` — ${e.date}` : ''}`), changes(e)));
+      }
+    }
+
+    el.appendChild(h('h2', {}, 'Progetto'));
+    const dl = h('dl', {});
+    dl.appendChild(h('dt', {}, 'Autore'));
+    dl.appendChild(h('dd', {}, 'Leonardo Angelini — ', link('https://www.linkedin.com/in/leonardoangelini/', 'LinkedIn')));
+    dl.appendChild(h('dt', {}, 'Codice'));
+    dl.appendChild(h('dd', {}, link(REPO_URL, 'github.com/leonardoangelini/evidentia'), ' — software libero, licenza ', link(`${REPO_URL}/blob/main/LICENSE`, 'Apache 2.0')));
+    dl.appendChild(h('dt', {}, 'Segnalazioni'));
+    dl.appendChild(h('dd', {}, 'Un problema o una proposta: ', link(`${REPO_URL}/issues`, 'Issues del repository'), '.'));
+    dl.appendChild(h('dt', {}, 'Privacy'));
+    dl.appendChild(h('dd', {}, 'I documenti e le analisi restano in questo browser. Nessun server di Evidentia, nessuna telemetria. ', link(`${REPO_URL}/blob/main/PRIVACY.md`, 'Informativa completa'), '.'));
+    el.appendChild(dl);
+
+    return el;
+  }
+
   function clamp(n: number, lo: number, hi: number): number {
     return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : lo;
   }

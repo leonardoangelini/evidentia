@@ -1,4 +1,4 @@
-# Ambiente di produzione: l'estensione pubblica sul Chrome Web Store.
+# Pubblicazione sul Chrome Web Store: l'unico ambiente di rilascio.
 #
 # Rilasciare è `npm version patch && git push`. Questo workflow parte quando
 # `package.json` cambia su main e pubblica se quella version non è ancora
@@ -93,19 +93,105 @@ jobs:
             echo "::notice::version $PREV → $VERSION, mai rilasciata: si pubblica sullo store."
           fi
 
-  production:
+  publish:
+    name: Pubblica sullo store
     needs: check
     if: needs.check.outputs.release == 'true'
-    uses: ./.github/workflows/publish.yml
-    with:
-      environment: chrome-web-store
-      channel: production
-      dry_run: ${{ inputs.dry_run || false }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+
+      - run: npm ci
+
+      # Un rilascio verifica sempre, anche quando la CI ha già girato sullo
+      # stesso commit: il job di pubblicazione deve bastare a sé stesso.
+      - run: npm run typecheck
+
+      - run: npm test
+
+      # Nessun .env in CI: lo ZIP non contiene la chiave che fissa l'id
+      # dell'estensione, così l'item usa l'id assegnato dallo store.
+      # WXT_GOOGLE_CLIENT_ID non è un segreto (finisce nel bundle: è un
+      # public client OAuth, senza client secret) ed è quindi una variabile,
+      # non un secret. Se assente, ogni scuola inserisce il proprio client ID
+      # nelle impostazioni di Evidentia.
+      - name: Build dello ZIP
+        env:
+          EVIDENTIA_CHANNEL: production
+          WXT_GOOGLE_CLIENT_ID: ${{ vars.WXT_GOOGLE_CLIENT_ID }}
+        run: npm run zip
+
+      # Un fork non ha le credenziali dello store: in quel caso il workflow
+      # costruisce e verifica, poi salta la pubblicazione con un avviso,
+      # invece di fallire in rosso.
+      - name: Credenziali disponibili?
+        id: preflight
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          PRIVATE_KEY_B64: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$PRIVATE_KEY_B64" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Environment 'chrome-web-store' senza credenziali del Chrome Web Store: pubblicazione saltata, lo ZIP resta fra gli artefatti. Vedi docs/release.md."
+          fi
+
+      - name: Riepilogo del pacchetto
+        run: |
+          set -euo pipefail
+          MANIFEST=.output/chrome-mv3/manifest.json
+          {
+            echo "| campo | valore |"
+            echo "|---|---|"
+            echo "| name | $(node -p "require('./$MANIFEST').name") |"
+            echo "| version | $(node -p "require('./$MANIFEST').version") |"
+            echo "| client ID OAuth nella build | $([ -n "${{ vars.WXT_GOOGLE_CLIENT_ID }}" ] && echo 'presente' || echo 'assente — la scuola usa il proprio') |"
+            echo "| dry run | ${{ inputs.dry_run || false }} |"
+            echo "| pubblicazione | $([ '${{ steps.preflight.outputs.configured }}' = 'true' ] && echo 'sì' || echo 'saltata: environment senza credenziali') |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pubblica
+        if: steps.preflight.outputs.configured == 'true'
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          # La chiave del service account è conservata in base64: un secret di
+          # GitHub accetta gli a-capo del PEM, ma il base64 evita ogni
+          # ambiguità di quoting nello shell.
+          PRIVATE_KEY_B64: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY_B64 }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        run: |
+          set -euo pipefail
+          export CHROME_SERVICE_ACCOUNT_PRIVATE_KEY="$(echo "$PRIVATE_KEY_B64" | base64 -d)"
+          ZIP=$(ls .output/*-chrome.zip | head -n 1)
+          test -f "$ZIP" || { echo "ZIP non trovato in .output/"; exit 1; }
+          echo "ZIP: $ZIP"
+          ARGS=(--chrome-api-version v2 --chrome-zip "$ZIP")
+          [ "$DRY_RUN" = "true" ] && ARGS+=(--dry-run)
+          npx publish-extension "${ARGS[@]}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: evidentia-${{ github.sha }}
+          path: .output/*-chrome.zip
+          retention-days: 30
+          if-no-files-found: error
+          # .output/ inizia con un punto: senza questo, upload-artifact la
+          # tratta come nascosta, non trova nulla e il job fallisce.
+          include-hidden-files: true
 
   release:
     name: Tag e Release
-    needs: [check, production]
+    needs: [check, publish]
     # Una prova a vuoto non ha pubblicato nulla: non lascia un tag a dire il
     # contrario.
     if: ${{ !inputs.dry_run }}

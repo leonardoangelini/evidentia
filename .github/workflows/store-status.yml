@@ -1,32 +1,23 @@
-# Interroga il Chrome Web Store sullo stato dell'item: versione pubblicata,
-# eventuale submission in review, visibilità. Sola lettura, non pubblica nulla.
+# Interroga il Chrome Web Store sullo stato dell'estensione: versione
+# pubblicata, eventuale submission in review, visibilità. Sola lettura, non
+# pubblica nulla.
 #
-# Si sceglie l'ambiente da interrogare: `chrome-web-store-testing` (item
-# "Evidentia (Testing)") o `chrome-web-store` (estensione pubblica). Le
-# credenziali vivono negli environment, quindi interrogare la produzione
-# passa dallo stesso environment del rilascio: è il prezzo di tenere i secret
-# fuori dalla portata di qualunque altro workflow.
+# Gira nell'environment `chrome-web-store`, lo stesso del rilascio: le
+# credenziali vivono lì, ed è il prezzo di tenerle fuori dalla portata di
+# qualunque altro workflow.
 name: Store status
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Quale item interrogare'
-        type: choice
-        default: chrome-web-store-testing
-        options:
-          - chrome-web-store-testing
-          - chrome-web-store
 
 permissions:
   contents: read
 
 jobs:
   status:
-    name: Stato di ${{ inputs.environment }}
+    name: Stato dell'item pubblico
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: chrome-web-store
     steps:
       - uses: actions/checkout@v7
 

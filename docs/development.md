@@ -125,11 +125,14 @@ usa la build "Chrome for Testing".
 
 ## Rami e ambienti
 
-Un solo branch, `main`. Ogni push esegue la CI e, se tocca il codice,
-aggiorna l'item *Evidentia (Testing)* dello store.
+Un solo branch, `main`. Ogni push esegue la CI, che verifica e lascia lo ZIP
+fra gli artefatti: non pubblica niente. Si prova in locale, con la build
+scompattata — il canale `testing` le dà nome e version diversi, così convive
+con l'estensione pubblica senza mescolarne i dati.
 
-Si rilascia alzando la `version` in `package.json` e spingendo: la CI se ne
-accorge, pubblica sull'estensione pubblica e crea tag e Release. Pubblicare
+Si rilascia aggiornando [CHANGELOG.md](../CHANGELOG.md), alzando la `version`
+in `package.json` e spingendo: la CI se ne accorge, pubblica sull'estensione
+pubblica e crea tag e Release. Pubblicare
 significa inviare a revisione — quando l'aggiornamento arriva agli utenti lo
 decide Google. Procedura completa in [release.md](release.md).
 
@@ -138,7 +141,7 @@ decide Google. Procedura completa in [release.md](release.md).
 | Variabile | Effetto |
 |---|---|
 | `EVIDENTIA_CHANNEL` | `testing` (default) o `production`: nome visibile e `version` del pacchetto. Mai il codice |
-| `EVIDENTIA_BUILD_NUMBER` | quarta componente della version sul canale testing (in CI è il numero di run) |
+| `EVIDENTIA_BUILD_NUMBER` | quarta componente della version sul canale testing (in CI è il numero di run), per distinguere due build della stessa version |
 | `WXT_GOOGLE_CLIENT_ID` | client ID OAuth predefinito per Google Docs; le impostazioni lo sovrascrivono |
 | `WXT_EXTENSION_KEY` | chiave pubblica che fissa l'id delle build locali (assente in CI) |
 | `EVIDENTIA_OUT_DIR` | cartella di output alternativa, per costruire due varianti senza sovrascriversi |
@@ -149,5 +152,5 @@ EVIDENTIA_CHANNEL=production npm run zip   # pacchetto identico a quello pubblic
 
 ## Pubblicazione
 
-Vedi [release.md](release.md): i due item sullo store, i secret dei due
-environment e il rilascio automatico a partire dal bump di `version`.
+Vedi [release.md](release.md): l'item sullo store, i secret dell'environment
+`chrome-web-store` e il rilascio automatico a partire dal bump di `version`.

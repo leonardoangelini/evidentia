@@ -95,32 +95,31 @@ Serve un **client OAuth 2.0** in un progetto Google Cloud:
 > client ID altrui significa consumarne la quota e mostrare il nome del suo
 > progetto Cloud nella schermata di consenso.
 
-#### Due ambienti, due id, un solo client
+#### Due id, un solo client
 
-Evidentia è pubblicata come due item distinti — *Evidentia (Testing)* e
-*Evidentia* — che hanno **id diversi** e quindi redirect URI diversi (vedi
-[release.md](release.md)). Non servono due client OAuth: un client di tipo
-*Applicazione web* accetta più **URI di reindirizzamento autorizzati**.
-Registrali entrambi sullo stesso client:
+L'estensione ha **due id diversi**, e quindi due redirect URI: quello
+assegnato dal Chrome Web Store all'item pubblicato, e quello delle build
+locali. Non servono due client OAuth — un client di tipo *Applicazione web*
+accetta più **URI di reindirizzamento autorizzati**. Registrali entrambi
+sullo stesso client:
 
 ```text
-https://<id-item-testing>.chromiumapp.org/
-https://<id-item-produzione>.chromiumapp.org/
+https://<id-item-sullo-store>.chromiumapp.org/
+https://<id-build-locale>.chromiumapp.org/
 ```
 
-L'ID dell'estensione è stabile per l'installazione da Chrome Web Store, ma
-per un caricamento non pacchettizzato dipende dal percorso della cartella
-(e `npm run dev` usa `.output/chrome-mv3-dev`, un percorso diverso dalla
-build). Per avere un solo redirect URI, `wxt.config.ts` mette nel manifest
-la chiave pubblica `WXT_EXTENSION_KEY` letta da `.env` (vedi
-`.env.example` per generarla): con la chiave l'ID è lo stesso in ogni
-profilo e cartella. In CI la variabile non esiste, quindi lo ZIP per lo
-store non contiene la chiave.
+L'ID di un'estensione caricata non pacchettizzata dipende dal percorso della
+cartella (e `npm run dev` usa `.output/chrome-mv3-dev`, un percorso diverso
+dalla build), quindi cambierebbe di continuo. Per fissarlo, `wxt.config.ts`
+mette nel manifest la chiave pubblica `WXT_EXTENSION_KEY` letta da `.env`
+(vedi `.env.example` per generarla): con la chiave l'id è lo stesso in ogni
+profilo e cartella, ed è quello da registrare come redirect URI di sviluppo.
+Per leggerlo, carica la build in `chrome://extensions` — oppure aprilo dalle
+impostazioni di Evidentia, sezione Google Docs, che mostrano il redirect URI
+completo.
 
-In locale conviene incollare in `.env` la chiave pubblica dell'item **di
-testing**, non quella di produzione: le build di sviluppo assumono l'id di
-testing, condividono il suo redirect URI, e non si mescolano mai con i dati
-dell'estensione che usano i docenti.
+In CI la variabile non esiste, quindi lo ZIP per lo store non contiene la
+chiave e l'item usa l'id assegnato dallo store.
 
 ### Verifica di Google (schermata "Esterno")
 
