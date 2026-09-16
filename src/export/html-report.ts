@@ -223,30 +223,121 @@ function timelineDetail(t: Analysis['timeline'][number]): string {
   return parts.join(' · ');
 }
 
-/** Inline SVG chart: word count per version with sessions, large insertions, revisions and gaps. */
+/** Una riga del tooltip; la prima è il titolo. */
+interface TipLine {
+  text: string;
+  head?: boolean;
+}
+
+/** Larghezza stimata di una riga: senza JS il riquadro non può misurare il testo. */
+function tipWidth(lines: TipLine[]): number {
+  const w = Math.max(...lines.map((l) => l.text.length * (l.head ? 6.5 : 6.0)));
+  return Math.min(392, Math.max(150, Math.ceil(w) + 18));
+}
+
+function tipClamp(text: string, max = 60): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+/**
+ * Inline SVG chart: word count per version, with sessions, large insertions,
+ * revisions and gaps.
+ *
+ * Ogni versione ha una banda verticale invisibile che al passaggio del mouse
+ * accende una guida e un riquadro con ciò che la riga della scheda Versioni
+ * direbbe: parole, variazione, tipo di cambiamento, intervallo, sessione,
+ * autore. Il riquadro è SVG e CSS, senza JavaScript: l'estensione inserisce
+ * questo markup con innerHTML (dove uno script non verrebbe eseguito) e il
+ * report esportato deve restare un file unico, apribile offline.
+ */
 export function wordCountChart(dataset: DocumentDataset, analysis: Analysis, width = 940, height = 260): string {
-  const snapshots = [...dataset.snapshots].filter((s) => s.extractionStatus !== 'UNAVAILABLE').sort((a, b) => a.index - b.index);
-  if (snapshots.length === 0) return '<p class="muted">Nessuna versione leggibile: grafico non disponibile.</p>';
-  const times = snapshots.map((s) => parseIso(s.timestamp));
+  const all = [...dataset.snapshots].sort((a, b) => parseIso(a.timestamp) - parseIso(b.timestamp) || a.index - b.index);
+  const readable = all.filter((s) => s.extractionStatus !== 'UNAVAILABLE');
+  if (readable.length === 0) return '<p class="muted">Nessuna versione leggibile: grafico non disponibile.</p>';
+  // La scala orizzontale copre anche le versioni non leggibili: sono segnate
+  // sull'asse, non nascoste.
+  const times = all.map((s) => parseIso(s.timestamp));
   const t0 = Math.min(...times);
   const t1 = Math.max(...times, t0 + 60_000);
-  const maxWords = Math.max(10, ...snapshots.map((s) => s.wordCount));
+  const maxWords = Math.max(10, ...readable.map((s) => s.wordCount));
   const pad = { l: 56, r: 16, t: 16, b: 36 };
+  const plotH = height - pad.t - pad.b;
+  const baseline = height - pad.b;
   const x = (t: number): number => pad.l + ((t - t0) / (t1 - t0)) * (width - pad.l - pad.r);
-  const y = (w: number): number => height - pad.b - (w / maxWords) * (height - pad.t - pad.b);
-  const path = snapshots.map((s, i) => `${i === 0 ? 'M' : 'L'}${x(parseIso(s.timestamp)).toFixed(1)},${y(s.wordCount).toFixed(1)}`).join(' ');
-  const sessionsRects = analysis.sessions.map((s) => { const a = x(parseIso(s.startedAt)); const b = x(parseIso(s.endedAt)); return `<rect x="${(a - 2).toFixed(1)}" y="${pad.t}" width="${Math.max(4, b - a + 4).toFixed(1)}" height="${height - pad.t - pad.b}" fill="#dbeafe" opacity="0.6"/>`; }).join('');
-  const insertionMarks = analysis.timeline.filter((t) => t.type === 'LARGE_INSERTION').map((t) => { const px = x(parseIso(t.time)); return `<line x1="${px.toFixed(1)}" y1="${pad.t}" x2="${px.toFixed(1)}" y2="${height - pad.b}" stroke="#b91c1c" stroke-dasharray="3,3"/><text x="${(px + 3).toFixed(1)}" y="${pad.t + 12}" font-size="10" fill="#b91c1c">+${t.words}</text>`; }).join('');
-  const revisionMarks = analysis.timeline.filter((t) => t.type === 'REVISION').map((t) => `<circle cx="${x(parseIso(t.time)).toFixed(1)}" cy="${(pad.t + 6).toFixed(1)}" r="4" fill="#7c3aed"><title>${esc(t.label ?? 'revisione')}</title></circle>`).join('');
-  const gapMarks = analysis.observation.knownGaps.filter((g) => g.to && g.type === 'LONG_INTERVAL').map((g) => { const a = x(parseIso(g.from)); const b = x(parseIso(g.to as string)); return `<rect x="${a.toFixed(1)}" y="${pad.t}" width="${Math.max(2, b - a).toFixed(1)}" height="${height - pad.t - pad.b}" fill="url(#hatch)" opacity="0.5"><title>${esc(g.type)}: ${esc(g.description)}</title></rect>`; }).join('');
-  const points = snapshots.map((s) => `<circle cx="${x(parseIso(s.timestamp)).toFixed(1)}" cy="${y(s.wordCount).toFixed(1)}" r="3" fill="#1d4ed8"><title>v${esc(s.versionLabel)} · ${s.wordCount} parole · ${esc(s.authorLabel ?? '')} · ${esc(s.timestamp)}</title></circle>`).join('');
+  const y = (w: number): number => baseline - (w / maxWords) * plotH;
+
+  const diffByTo = new Map(dataset.diffs.map((d) => [d.toSnapshotId, d]));
+  const readablePos = new Map(readable.map((s, i) => [s.id, i]));
+  const threshold = analysis.metrics.insertions.thresholdWords;
+  const longGaps = analysis.observation.knownGaps.filter((g) => g.type === 'LONG_INTERVAL' && g.to);
+  const beforeFirst = analysis.observation.knownGaps.some((g) => g.type === 'BEFORE_FIRST_VERSION');
+  const sessionOf = (index: number): Analysis['sessions'][number] | undefined => analysis.sessions.find((s) => index >= s.fromSnapshotIndex && index <= s.toSnapshotIndex);
+
+  const path = readable.map((s, i) => `${i === 0 ? 'M' : 'L'}${x(parseIso(s.timestamp)).toFixed(1)},${y(s.wordCount).toFixed(1)}`).join(' ');
+  const sessionsRects = analysis.sessions.map((s) => { const a = x(parseIso(s.startedAt)); const b = x(parseIso(s.endedAt)); return `<rect x="${(a - 2).toFixed(1)}" y="${pad.t}" width="${Math.max(4, b - a + 4).toFixed(1)}" height="${plotH}" fill="#dbeafe" opacity="0.6"/>`; }).join('');
+  const insertionMarks = analysis.timeline.filter((t) => t.type === 'LARGE_INSERTION').map((t) => { const px = x(parseIso(t.time)); return `<line x1="${px.toFixed(1)}" y1="${pad.t}" x2="${px.toFixed(1)}" y2="${baseline}" stroke="#b91c1c" stroke-dasharray="3,3"/><text x="${(px + 3).toFixed(1)}" y="${pad.t + 12}" font-size="10" fill="#b91c1c">+${t.words}</text>`; }).join('');
+  const revisionMarks = analysis.timeline.filter((t) => t.type === 'REVISION').map((t) => `<circle cx="${x(parseIso(t.time)).toFixed(1)}" cy="${(pad.t + 6).toFixed(1)}" r="4" fill="#7c3aed"/>`).join('');
+  const gapMarks = longGaps.map((g) => { const a = x(parseIso(g.from)); const b = x(parseIso(g.to as string)); return `<rect x="${a.toFixed(1)}" y="${pad.t}" width="${Math.max(2, b - a).toFixed(1)}" height="${plotH}" fill="url(#hatch)" opacity="0.5"/>`; }).join('');
+  const points = readable.map((s) => `<circle cx="${x(parseIso(s.timestamp)).toFixed(1)}" cy="${y(s.wordCount).toFixed(1)}" r="3" fill="#1d4ed8"/>`).join('');
+  const missingMarks = all.filter((s) => s.extractionStatus === 'UNAVAILABLE').map((s) => { const px = x(parseIso(s.timestamp)); return `<line x1="${px.toFixed(1)}" y1="${baseline - 9}" x2="${px.toFixed(1)}" y2="${baseline + 3}" stroke="#9ca3af" stroke-width="2"/>`; }).join('');
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => `<text x="${pad.l - 6}" y="${(y(f * maxWords) + 4).toFixed(1)}" font-size="10" text-anchor="end" fill="#6b7280">${formatInt(f * maxWords)}</text><line x1="${pad.l}" x2="${width - pad.r}" y1="${y(f * maxWords).toFixed(1)}" y2="${y(f * maxWords).toFixed(1)}" stroke="#e5e7eb"/>`).join('');
   const xTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => { const t = t0 + f * (t1 - t0); return `<text x="${x(t).toFixed(1)}" y="${height - 4}" font-size="10" text-anchor="middle" fill="#6b7280">${formatDateTime(new Date(t).toISOString())}</text>`; }).join('');
-  return `<svg viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Parole per versione nel tempo" style="max-width:100%;height:auto;background:#fff;border:1px solid #e5e7eb;border-radius:6px">
+
+  const at = all.map((s) => x(parseIso(s.timestamp)));
+  const bands = all
+    .map((s, i) => {
+      const px = at[i] as number;
+      const from = i === 0 ? pad.l : ((at[i - 1] as number) + px) / 2;
+      const to = i === all.length - 1 ? width - pad.r : (px + (at[i + 1] as number)) / 2;
+      const un = s.extractionStatus === 'UNAVAILABLE';
+      const d = diffByTo.get(s.id);
+      const session = sessionOf(s.index);
+      const elapsedMs = i > 0 ? (times[i] as number) - (times[i - 1] as number) : null;
+      const gapBefore = longGaps.find((g) => g.to === s.timestamp);
+
+      const lines: TipLine[] = [{ text: `v${s.versionLabel}${s.isCurrent ? ' · corrente' : ''} — ${formatDateTime(s.timestamp)}`, head: true }];
+      if (un) {
+        lines.push({ text: 'Versione non leggibile: restano solo i metadati.' });
+        if (s.extractionNotes.length) lines.push({ text: tipClamp(s.extractionNotes.join('; ')) });
+      } else {
+        const j = readablePos.get(s.id) as number;
+        const prev = (j > 0 ? readable[j - 1] : null) ?? null;
+        const delta = prev ? s.wordCount - prev.wordCount : null;
+        // "leggibile" solo quando fra le due c'è davvero una versione saltata.
+        const skipped = prev !== null && all.indexOf(prev) !== i - 1;
+        lines.push({ text: `${formatInt(s.wordCount)} parole${delta === null ? '' : ` · ${delta >= 0 ? '+' : '−'}${formatInt(Math.abs(delta))} dalla precedente${skipped ? ' leggibile' : ''}`}` });
+        if (d && d.classification === 'UNCHANGED') lines.push({ text: 'Testo identico alla versione precedente.' });
+        else if (d && d.classification !== 'UNKNOWN') lines.push({ text: `${d.classification} · +${formatInt(d.wordsAdded)} / −${formatInt(d.wordsDeleted)} / ~${formatInt(d.wordsReplaced)} parole` });
+      }
+      // L'intervallo si dice una volta sola: se è un gap dichiarato, lo dice qui.
+      const meta = [elapsedMs === null ? 'prima versione della cronologia' : gapBefore ? `intervallo lungo: ${formatDuration(elapsedMs)} senza versioni` : `${formatDuration(elapsedMs)} dalla precedente`];
+      if (session) meta.push(`sessione ${session.index + 1}`);
+      if (s.authorLabel) meta.push(s.authorLabel);
+      lines.push({ text: tipClamp(meta.join(' · ')) });
+      if (d && d.wordCountDelta >= threshold) lines.push({ text: `Grande inserimento: +${formatInt(d.wordCountDelta)} parole (soglia ${formatInt(threshold)}).` });
+      if (i === 0 && beforeFirst) lines.push({ text: tipClamp('La stesura precedente a questa versione non è osservabile.') });
+
+      const tw = tipWidth(lines);
+      const th = 10 + lines.length * 14;
+      let tx = px + 12;
+      if (tx + tw > width - 4) tx = px - 12 - tw;
+      tx = Math.max(4, Math.min(tx, width - 4 - tw));
+      const anchorY = un ? pad.t + 24 : y(s.wordCount);
+      const ty = Math.max(pad.t + 2, Math.min(anchorY - th / 2, height - 4 - th));
+      const dot = un ? '' : `<circle cx="${px.toFixed(1)}" cy="${y(s.wordCount).toFixed(1)}" r="5" fill="#fff" stroke="#1d4ed8" stroke-width="2"/>`;
+      const text = lines.map((l, k) => `<text class="${l.head ? 'h' : ''}" x="9" y="${18 + k * 14}">${esc(l.text)}</text>`).join('');
+      return `<g class="ev-band"><rect x="${from.toFixed(1)}" y="${pad.t}" width="${Math.max(2, to - from).toFixed(1)}" height="${plotH}" fill="transparent"/><g class="ev-hl"><line x1="${px.toFixed(1)}" y1="${pad.t}" x2="${px.toFixed(1)}" y2="${baseline}" stroke="#6b7280" stroke-dasharray="2,3"/>${dot}</g><g class="ev-tip" transform="translate(${tx.toFixed(1)},${ty.toFixed(1)})"><rect width="${tw}" height="${th}" rx="6" fill="#fff" stroke="#9ca3af"/>${text}</g></g>`;
+    })
+    .join('');
+
+  const span = `${formatDateTime(all[0]?.timestamp ?? '')} — ${formatDateTime(all.at(-1)?.timestamp ?? '')}`;
+  const summary = `Parole per versione nel tempo: ${all.length} versioni fra ${span}, da ${formatInt((readable[0] as (typeof readable)[number]).wordCount)} a ${formatInt((readable.at(-1) as (typeof readable)[number]).wordCount)} parole, ${analysis.sessions.length} sessioni, ${analysis.metrics.insertions.numberOfLargeInsertions} grandi inserimenti. Gli stessi dati, in forma di tabella, sono nell'elenco delle versioni.`;
+  return `<svg class="ev-chart" viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="${esc(summary)}" style="max-width:100%;height:auto;background:#fff;border:1px solid #e5e7eb;border-radius:6px">
 <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#b45309" stroke-width="2"/></pattern></defs>
-${sessionsRects}${gapMarks}${yTicks}${xTicks}${insertionMarks}<path d="${path}" fill="none" stroke="#1d4ed8" stroke-width="2"/>${points}${revisionMarks}
+<style>.ev-chart text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.ev-chart .ev-hl,.ev-chart .ev-tip{opacity:0;pointer-events:none}.ev-chart .ev-band:hover .ev-hl,.ev-chart .ev-band:hover .ev-tip{opacity:1}.ev-chart .ev-tip text{font-size:11px;fill:#1f2937}.ev-chart .ev-tip text.h{font-weight:600}@media print{.ev-chart .ev-hl,.ev-chart .ev-tip,.ev-hint{display:none}}</style>
+${sessionsRects}${gapMarks}${yTicks}${xTicks}${insertionMarks}<path d="${path}" fill="none" stroke="#1d4ed8" stroke-width="2"/>${points}${missingMarks}${revisionMarks}${bands}
 </svg>
-<div class="legend"><span><i style="background:#1d4ed8"></i>parole per versione</span><span><i style="background:#dbeafe"></i>sessione</span><span><i style="background:#b91c1c"></i>grande inserimento</span><span><i style="background:#7c3aed"></i>revisione</span><span><i style="background:#b45309"></i>intervallo lungo</span></div>`;
+<div class="legend"><span><i style="background:#1d4ed8"></i>parole per versione</span><span><i style="background:#dbeafe"></i>sessione</span><span><i style="background:#b91c1c"></i>grande inserimento</span><span><i style="background:#7c3aed"></i>revisione</span><span><i style="background:#b45309"></i>intervallo lungo</span><span><i style="background:#9ca3af"></i>versione non leggibile</span><span class="muted ev-hint">passa il mouse su una versione per i dettagli</span></div>`;
 }
 
 function capitalize(text: string): string {

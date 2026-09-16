@@ -8,6 +8,19 @@ Questo file è incluso nell'estensione: è quello che la scheda *Info* mostra
 senza bisogno di collegarsi a internet. Va aggiornato **prima** di alzare la
 `version` in `package.json` (vedi [docs/release.md](docs/release.md)).
 
+## 0.2.1 — 2026-09-16
+
+- Il grafico **Parole per versione nel tempo** risponde al passaggio del
+  mouse: su ogni versione compaiono data, parole, variazione rispetto alla
+  precedente, tipo di cambiamento, intervallo, sessione e autore. I grandi
+  inserimenti e gli intervalli lunghi sono dichiarati sul punto in cui
+  capitano, e la versione più vecchia dice quando la stesura che la precede
+  non è osservabile.
+- Le **versioni non leggibili** non sono più omesse dal grafico: sono segnate
+  sull'asse e, come le altre, spiegano che cosa manca e perché.
+- I dettagli restano anche nel report HTML esportato, che continua a essere un
+  file unico, apribile offline e senza JavaScript.
+
 ## 0.2.0 — 2026-09-16
 
 Interfaccia semplificata: meno schede, meno numeri in primo piano, tutto in

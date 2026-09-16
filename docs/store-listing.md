@@ -39,7 +39,7 @@ Apri un documento Word su SharePoint o OneDrive for Business con il tuo account 
 COSA MOSTRA
 
 • Panoramica: i numeri essenziali del documento e i punti da guardare (grandi inserimenti, revisioni, gap)
-• Cronologia: parole per versione, sessioni di lavoro, tempo stimato per sessione e per giornata, intervalli lunghi
+• Cronologia: parole per versione, sessioni di lavoro, tempo stimato per sessione e per giornata, intervalli lunghi; il grafico mostra i dettagli di ogni versione al passaggio del mouse
 • Contenuti: quali sezioni e paragrafi sono comparsi, cambiati o scomparsi in ogni sessione, da dove viene ogni paragrafo del testo finale, quale testo è stato eliminato
 • Versioni: ogni versione con il passaggio dalla precedente (tipo di cambiamento, parole aggiunte ed eliminate, grandi inserimenti con estratto) e il confronto parola per parola fra due versioni qualsiasi
 • Copertura: ciò che la cronologia non copre, dichiarato esplicitamente
