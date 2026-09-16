@@ -37,7 +37,6 @@ export function deriveSessions(snapshots: Snapshot[], options: SessionOptions): 
       toSnapshotIndex: Math.max(...cluster.map((s) => s.index)),
       wordCountStart: wordsStart,
       wordCountEnd: wordsEnd,
-      netWordChange: wordsStart !== null && wordsEnd !== null ? wordsEnd - wordsStart : 0,
       authorLabels: Array.from(new Set(cluster.map((s) => s.authorLabel).filter((a): a is string => a !== null))),
     });
     cluster = [];

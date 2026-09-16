@@ -12,7 +12,7 @@ describe('LLM export', () => {
     const analysis = await analyzeDataset(ds);
     const full = buildLlmInput(ds, analysis, AT);
     const compact = buildCompactLlmInput(ds, analysis, AT);
-    expect(full.schemaVersion).toBe('2.1');
+    expect(full.schemaVersion).toBe('2.2');
     expect(full.timeEstimates.sessions.length).toBe(analysis.sessions.length);
     expect(full.contentEvolution.finalParagraphs.length).toBe(ds.snapshots.at(-1)?.paragraphCount);
     expect(compact.timeEstimates).not.toHaveProperty('intervals');

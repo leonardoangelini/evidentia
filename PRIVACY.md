@@ -21,7 +21,7 @@ e lo conserva nel suo browser.
 2. **Azione esplicita.** Nulla viene letto finché il docente non preme
    *Analizza cronologia versioni*. L'avanzamento è visibile.
 3. **Controllo.** Il docente può vedere tutto ciò che è stato raccolto
-   (Process View → Raw data), esportare e cancellare i dati per singolo
+   (Process View → Dati grezzi), esportare e cancellare i dati per singolo
    documento o tutti.
 4. **Minimizzazione.** Non vengono letti altri file, altre tab, la posta o
    il profilo del docente. Per Google lo scope richiesto (`drive.readonly`)

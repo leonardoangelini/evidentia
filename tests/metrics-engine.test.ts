@@ -6,7 +6,7 @@ describe('metrics', () => {
     const { metrics } = await analyzeDataset(await buildCaseB());
     expect(metrics.insertions.numberOfLargeInsertions).toBe(1);
     expect(metrics.insertions.largestInsertionWords).toBeGreaterThanOrEqual(700);
-    expect(metrics.insertions.insertionsOver300Words).toBe(1);
+    expect(metrics.insertions.totalWordsInLargeInsertions).toBe(metrics.insertions.largestInsertionWords);
     expect(metrics.insertions.thresholdWords).toBe(300);
     expect(metrics.timeline.largestWordIncreaseBetweenVersions).toBeGreaterThanOrEqual(700);
     expect(metrics.timeline.shortestIntervalWithLargeIncreaseMs).toBe(4 * 60_000);

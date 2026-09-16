@@ -10,7 +10,7 @@
  * la build "Chrome for Testing" che playwright-core scarica. Si può indicare un
  * altro binario con EVIDENTIA_CHROME_BIN.
  */
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,9 +35,11 @@ if (!existsSync(bin)) {
   process.exit(1);
 }
 
-// Chrome deriva l'ID di un'estensione unpacked dal path assoluto: sha256, primi
-// 16 byte, ogni nibble mappato 0-f -> a-p.
-const extId = createHash('sha256').update(EXT).digest('hex').slice(0, 32)
+// L'ID di un'estensione è sha256 (primi 16 byte, nibble 0-f -> a-p) della
+// chiave pubblica dichiarata nel manifest o, se manca, del path assoluto.
+const manifest = JSON.parse(readFileSync(join(EXT, 'manifest.json'), 'utf8'));
+const idSource = manifest.key ? Buffer.from(manifest.key, 'base64') : EXT;
+const extId = createHash('sha256').update(idSource).digest('hex').slice(0, 32)
   .split('').map((c) => String.fromCharCode(97 + parseInt(c, 16))).join('');
 
 // Nomi plausibili al posto di quelli dei casi demo: la vetrina non deve
@@ -67,7 +69,11 @@ const page = await ctx.newPage();
 await page.goto(`chrome-extension://${extId}/process-view.html`, { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(800);
 
+// Il primo caso si carica dalla pagina vuota; gli altri dal blocco "Carica un
+// caso demo…" in fondo alla barra laterale, chiuso di default.
 for (const c of ['Caso A', 'Caso C', 'Caso E']) {
+  const demo = page.locator('aside.sidebar details.demo');
+  if ((await demo.count()) > 0 && !(await demo.evaluate((el) => el.open))) await demo.locator('summary').click();
   await page.getByRole('button', { name: new RegExp(`^${c}`) }).click();
   await page.waitForTimeout(2500);
 }
@@ -89,7 +95,7 @@ const openTab = async (label) => {
 /** Toglie il messaggio di stato e sostituisce i nomi dei file demo. */
 const tidy = () =>
   page.evaluate((rename) => {
-    for (const el of document.querySelectorAll('.notice')) el.remove();
+    for (const el of document.querySelectorAll('.notice.status')) el.remove();
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let n = walker.nextNode(); n; n = walker.nextNode()) {
       for (const [from, to] of Object.entries(rename)) {
@@ -116,15 +122,15 @@ const shot = async (name, { keepScroll = false } = {}) => {
 };
 
 await selectDoc('A');
-await openTab('Overview');
-await shot('1-overview');
-await openTab('Timeline');
-await shot('2-timeline');
-await openTab('Contenuti per fase');
-await shot('3-contenuti-per-fase');
+await openTab('Panoramica');
+await shot('1-panoramica');
+await openTab('Cronologia');
+await shot('2-cronologia');
+await openTab('Contenuti');
+await shot('3-contenuti');
 
 await selectDoc('C');
-await openTab('Versions');
+await openTab('Versioni');
 const rows = page.locator('table tr.selectable');
 const n = await rows.count();
 await rows.nth(0).click();
@@ -138,8 +144,8 @@ await page.waitForTimeout(400);
 await shot('4-confronto-versioni', { keepScroll: true });
 
 await selectDoc('E');
-await openTab('Observation gaps');
-await shot('5-gap-di-osservazione');
+await openTab('Copertura');
+await shot('5-copertura');
 
 await ctx.close();
 rmSync(PROFILE, { recursive: true, force: true });

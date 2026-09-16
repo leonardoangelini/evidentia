@@ -27,7 +27,8 @@ Chrome dedicato in `.wxt/chrome-profile`, così il login Microsoft 365 resta fra
 un avvio e l'altro.
 
 Per lavorare sull'interfaccia senza un documento reale ci sono i **casi demo**
-(barra laterale della Process View): cronologie sintetiche che coprono i casi
+(pagina iniziale della Process View, o *Carica un caso demo…* in fondo alla
+barra laterale): cronologie sintetiche che coprono i casi
 limite. Usali anche negli screenshot: nessun documento reale deve finire nel
 repository, nelle issue o nelle PR.
 

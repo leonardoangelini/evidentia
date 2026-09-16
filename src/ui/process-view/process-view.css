@@ -1,16 +1,39 @@
 body{display:flex;min-height:100vh}
-.sidebar{width:270px;flex:none;border-right:1px solid var(--line);padding:16px;background:var(--bg2);overflow:auto;position:sticky;top:0;height:100vh}
-.sidebar .brand{font-weight:800;letter-spacing:.12em;font-size:13px;display:flex;align-items:center;gap:8px}.sidebar .brand svg{color:var(--accent)}.sidebar h3{margin:18px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.sidebar{width:270px;flex:none;border-right:1px solid var(--line);padding:16px;background:var(--bg2);overflow:auto;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.sidebar .brand{font-weight:800;letter-spacing:.12em;font-size:13px;display:flex;align-items:center;gap:8px;border:none;background:none;padding:0;color:var(--fg);text-align:left}.sidebar .brand svg{color:var(--accent)}.sidebar .brand:hover{background:none;color:var(--accent)}
+.sidebar h3{margin:18px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .sidebar .doc{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px}.sidebar .doc.active{border-color:var(--accent);background:var(--accent2)}.sidebar .doc .title{font-weight:600;word-break:break-word}
 .sidebar .full{width:100%;margin:4px 0;text-align:left}.small{font-size:12px}
+.sidebar .export-links{display:flex;gap:4px;flex-wrap:wrap}.sidebar .export-links button{flex:1 1 auto;padding:5px 8px;font-size:12px;text-align:center;white-space:nowrap}
+/* Link testuali: le viste di servizio e l'eliminazione del documento non sono comandi da pulsante. */
+.sidebar .link{border:none;background:none;padding:0;color:var(--accent);font-size:12px;cursor:pointer;text-align:left}.sidebar .link:hover{background:none;text-decoration:underline}
+.sidebar .link.active{font-weight:600;text-decoration:underline}.sidebar .link.danger{color:var(--danger);margin-top:8px}
+.sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.sidebar-footer details.demo{margin:0 0 10px}.sidebar-footer details.demo summary{font-size:12px;color:var(--muted);font-weight:500}.sidebar-footer details.demo p{margin:4px 0}
+.sidebar-footer .links{display:flex;flex-wrap:wrap;gap:2px 12px}
 /* In fondo alla colonna: un'etichetta, non un comando. Porta alla scheda Info. */
-.sidebar .version{width:100%;margin:20px 0 0;padding:8px 0 0;border:none;border-top:1px solid var(--line);border-radius:0;background:none;color:var(--muted);font-size:12px;text-align:left;font-variant-numeric:tabular-nums}
+.sidebar .version{width:100%;margin:8px 0 0;padding:0;border:none;background:none;color:var(--muted);font-size:12px;text-align:left;font-variant-numeric:tabular-nums}
 .sidebar .version:hover{background:none;color:var(--accent)}
 .main{flex:1;padding:16px 28px 48px;max-width:1200px}
 .tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;position:sticky;top:0;background:#fff;padding:8px 0;z-index:1}
 .tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;padding:6px 10px}.tabs button.active{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
+.tabs .tabs-current{margin-left:auto;align-self:center;color:var(--muted);font-size:12px;padding-right:4px}
 details{margin:8px 0}summary{cursor:pointer;font-weight:600}
 .progress .bar{height:8px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}.progress .fill{height:100%;background:var(--accent);transition:width .3s}
+/* Riga di sintesi: pochi valori con la loro "i", senza il peso di una card. */
+.summary{display:flex;flex-wrap:wrap;gap:6px 22px;margin:10px 0}.summary strong{font-variant-numeric:tabular-nums}
+/* Richiami della Panoramica: un conteggio e dove guardarlo. */
+.callouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.callout{text-align:left;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:6px;background:#fff;display:block}
+.callout .n{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}.callout .t{font-weight:600;display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.callout.ins{border-left-color:var(--danger)}.callout.rev{border-left-color:var(--rev)}.callout.gap{border-left-color:var(--warn)}
+/* Versioni: la riga di un grande inserimento e l'estratto che la segue. */
+table.versions tr.large td:first-child{box-shadow:inset 3px 0 var(--danger)}
+table.versions tr.excerpt-row td{background:var(--bg2);cursor:default}table.versions tr.excerpt-row details{margin:0}table.versions tr.excerpt-row summary{font-weight:500;font-size:13px}
+/* Pagina senza documenti. */
+.empty-state{max-width:760px;padding:16px 0}
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:12px 0}
+.demo-card{text-align:left;padding:12px;display:block}.demo-card strong{display:block;margin-bottom:4px}
 .about{max-width:700px}
 .about-head{display:flex;align-items:center;gap:14px;margin:4px 0 12px}.about-head svg{color:var(--accent);flex:none}.about-name{font-weight:800;letter-spacing:.12em;font-size:18px}
 .about .lead{font-size:15px}

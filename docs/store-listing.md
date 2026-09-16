@@ -38,12 +38,11 @@ Apri un documento Word su SharePoint o OneDrive for Business con il tuo account 
 
 COSA MOSTRA
 
-• Timeline: parole per versione, sessioni di lavoro, grandi inserimenti, revisioni, intervalli lunghi
-• Sessioni: le versioni vicine nel tempo raggruppate in sessioni di scrittura
-• Tempo stimato: durata stimata per sessione e per giornata, parole per ora
-• Contenuti per fase: quali sezioni e paragrafi sono comparsi, cambiati o scomparsi in ogni sessione, da dove viene ogni paragrafo del testo finale, quale testo è stato eliminato
-• Confronto fra versioni: differenze parola per parola fra due versioni qualsiasi
-• Gap di osservazione: ciò che la cronologia non copre, dichiarato esplicitamente
+• Panoramica: i numeri essenziali del documento e i punti da guardare (grandi inserimenti, revisioni, gap)
+• Cronologia: parole per versione, sessioni di lavoro, tempo stimato per sessione e per giornata, intervalli lunghi
+• Contenuti: quali sezioni e paragrafi sono comparsi, cambiati o scomparsi in ogni sessione, da dove viene ogni paragrafo del testo finale, quale testo è stato eliminato
+• Versioni: ogni versione con il passaggio dalla precedente (tipo di cambiamento, parole aggiunte ed eliminate, grandi inserimenti con estratto) e il confronto parola per parola fra due versioni qualsiasi
+• Copertura: ciò che la cronologia non copre, dichiarato esplicitamente
 • Glossario: ogni valore ha la sua definizione ed è etichettato Osservato, Derivato o Stima
 • Export: report HTML, archivio ZIP con i dati grezzi, documento pronto da allegare a Copilot, ChatGPT o Claude
 
@@ -126,11 +125,11 @@ valutare il merito creditizio).
 
   | # | File | Cosa mostra |
   |---|---|---|
-  | 1 | `1-overview.png` | Le metriche del documento a colpo d'occhio |
-  | 2 | `2-timeline.png` | Il grafico delle parole per versione e il registro degli eventi |
-  | 3 | `3-contenuti-per-fase.png` | Cosa è comparso, cambiato o sparito in ogni sessione |
+  | 1 | `1-panoramica.png` | I numeri essenziali e i punti da guardare |
+  | 2 | `2-cronologia.png` | Il grafico delle parole per versione, le sessioni e il tempo stimato |
+  | 3 | `3-contenuti.png` | Cosa è comparso, cambiato o sparito in ogni sessione |
   | 4 | `4-confronto-versioni.png` | Il diff parola per parola fra due versioni |
-  | 5 | `5-gap-di-osservazione.png` | Ciò che la cronologia non copre, dichiarato |
+  | 5 | `5-copertura.png` | Ciò che la cronologia non copre, dichiarato |
 
   Vengono dai casi demo, quindi nessun documento reale finisce in vetrina. Per
   rigenerarli dopo un cambio di interfaccia: `npm run build && npm run store:shots`

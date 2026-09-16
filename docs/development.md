@@ -85,7 +85,9 @@ mostrato all'utente si aggiunge prima lì.
 
 ## Dati demo
 
-Dalla barra laterale della Process View si caricano i casi A–E: scrittura
+I casi A–E si caricano dalla Process View: dalla pagina iniziale quando non
+c'è ancora nessun documento, altrimenti da *Carica un caso demo…* in fondo
+alla barra laterale. Coprono: scrittura
 progressiva, grande inserimento, bozza + revisione importante, cronologia
 scarsa con prima versione già completa, versioni non scaricabili.
 

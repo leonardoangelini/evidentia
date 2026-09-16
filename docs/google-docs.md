@@ -189,6 +189,6 @@ escluse) segue [sharepoint.md](sharepoint.md) §4.
    indica "Google Docs · revisioni di Google Drive".
 2. *Analizza cronologia versioni* → nella Process View: concedi l'accesso a
    Google Drive (una volta) → consenso Google → avanzamento.
-3. Verifica in *Versions* date, autori, conteggi; confronta due revisioni.
-4. *Observation gaps* elenca i limiti specifici di Google Drive.
+3. Verifica in *Versioni* date, autori, conteggi; confronta due revisioni.
+4. *Copertura* elenca i limiti specifici di Google Drive.
 5. *Export ZIP* → `manifest.json` riporta `source: GOOGLE_DRIVE_REVISIONS`.

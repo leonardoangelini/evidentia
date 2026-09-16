@@ -70,8 +70,6 @@ export function computeMetrics(dataset: DocumentDataset, sessions: Session[], op
       numberOfLargeInsertions: large.length,
       largestInsertionWords: largeWords.length ? Math.max(...largeWords) : 0,
       totalWordsInLargeInsertions: sum(largeWords),
-      insertionsOver300Words: diffs.filter((d) => d.wordCountDelta > 300).length,
-      insertionsOver1000Words: diffs.filter((d) => d.wordCountDelta > 1000).length,
       thresholdWords: options.largeInsertionWords,
     },
     revision: {

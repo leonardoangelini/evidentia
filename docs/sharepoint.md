@@ -101,6 +101,6 @@ ogni import; per 100 versioni di 500 paragrafi restano sotto il secondo.
 
 1. Apri un documento Word su SharePoint/OneDrive, clicca l'icona di Evidentia.
 2. *Analizza cronologia versioni* → la Process View mostra l'avanzamento.
-3. Verifica in *Versions* date, autori, conteggi; confronta due versioni.
-4. *Observation gaps* elenca ciò che non è osservabile.
+3. Verifica in *Versioni* date, autori, conteggi; confronta due versioni.
+4. *Copertura* elenca ciò che non è osservabile.
 5. *Export ZIP* → apri `report/process-report.html`.

@@ -99,17 +99,18 @@ aperto senza modifiche, o il lavoro fatto fuori dal documento, non compaiono.
 ## Cosa mostra
 
 <div align="center">
-  <img src="store/screenshots/2-timeline.png" alt="Timeline delle versioni con sedute e grandi inserimenti" width="800">
+  <img src="store/screenshots/2-cronologia.png" alt="Cronologia: grafico delle parole per versione, sedute e tempo stimato" width="800">
 </div>
 
-**Timeline** — parole per versione, con le sedute di lavoro, i grandi
-inserimenti, le revisioni e gli intervalli lunghi evidenziati.
+**Cronologia** — parole per versione, con le sedute di lavoro, i grandi
+inserimenti, le revisioni e gli intervalli lunghi evidenziati; per ogni seduta
+e per ogni giornata il tempo stimato, dichiarato come stima.
 
 <div align="center">
-  <img src="store/screenshots/3-contenuti-per-fase.png" alt="Contenuti comparsi, modificati ed eliminati in ogni fase" width="800">
+  <img src="store/screenshots/3-contenuti.png" alt="Contenuti comparsi, modificati ed eliminati in ogni fase" width="800">
 </div>
 
-**Contenuti per fase** — quali sezioni e paragrafi sono comparsi, cambiati o
+**Contenuti** — quali sezioni e paragrafi sono comparsi, cambiati o
 scomparsi in ogni seduta; da dove viene ogni paragrafo del testo finale; cosa è
 stato eliminato lungo la strada.
 
@@ -120,15 +121,17 @@ stato eliminato lungo la strada.
 **Confronto versioni** — il diff parola per parola fra due versioni qualsiasi.
 
 <div align="center">
-  <img src="store/screenshots/5-gap-di-osservazione.png" alt="Gap di osservazione" width="800">
+  <img src="store/screenshots/5-copertura.png" alt="Copertura dell'osservazione: gap, versioni non leggibili, limiti" width="800">
 </div>
 
-**Gap di osservazione** — dove la cronologia è muta. È la scheda che impedisce
-di scambiare l'assenza di dati per assenza di lavoro.
+**Copertura** — dove la cronologia è muta. È la scheda che impedisce di
+scambiare l'assenza di dati per assenza di lavoro.
 
-Più: **overview**, **sedute**, **tempo stimato** (per seduta e per giornata,
-parole per ora), **grandi inserimenti**, **statistiche di revisione**, **raw
-data**, **glossario** e **impostazioni**.
+Più: la **Panoramica** (i numeri essenziali e i punti da guardare), le
+**Versioni** (ogni versione con il passaggio dalla precedente: tipo di
+cambiamento, parole aggiunte ed eliminate, grandi inserimenti con estratto) e,
+in fondo alla barra laterale, **glossario**, **impostazioni**, **info** e
+**dati grezzi**.
 
 ## Export e uso con un LLM
 
@@ -152,7 +155,7 @@ Contenuto e schema: [docs/development.md](docs/development.md) e
   documento.
 - **Azione esplicita.** Nulla viene letto finché il docente non preme *Analizza
   cronologia versioni*.
-- **Controllo.** Tutto ciò che è stato raccolto è ispezionabile (*Raw data*),
+- **Controllo.** Tutto ciò che è stato raccolto è ispezionabile (*Dati grezzi*),
   esportabile e cancellabile, per singolo documento o del tutto.
 - **Pseudonimizzazione.** Gli autori sono etichette più un hash SHA-256
   dell'identità; il nome visualizzato si conserva solo in modalità FULL.
@@ -210,8 +213,8 @@ per Google Docs serve un client ID OAuth proprio: vedi
 [docs/google-docs.md](docs/google-docs.md). Chi installa dal Chrome Web Store
 non deve configurare nulla.
 
-> **Preferisci guardare prima?** Apri la Process View e carica i **dati demo**
-> dalla barra laterale: cinque cronologie simulate, nessun documento reale.
+> **Preferisci guardare prima?** Apri la Process View: senza documenti propone
+> i **casi demo**, cinque cronologie simulate, nessun documento reale.
 
 ### Se qualcosa non funziona
 

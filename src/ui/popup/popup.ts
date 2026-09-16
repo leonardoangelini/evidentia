@@ -48,7 +48,7 @@ export function mountPopup(root: HTMLElement): void {
       h('button', { class: 'primary', disabled: busy, onclick: () => openPage(`process-view.html?import=${encodeURIComponent(tab?.url ?? '')}`) }, existing ? 'Aggiorna analisi delle versioni' : 'Analizza cronologia versioni'),
     );
     if (existing) {
-      actions.appendChild(h('button', { onclick: () => openPage(`process-view.html?doc=${existing.id}`) }, 'View process'));
+      actions.appendChild(h('button', { onclick: () => openPage(`process-view.html?doc=${existing.id}`) }, 'Apri l\'analisi'));
       actions.appendChild(h('button', { disabled: busy, onclick: () => void doExport(() => exportLlmDocument(existing.id, 'docx')) }, 'Esporta per Copilot / LLM (.docx)'));
       actions.appendChild(h('button', { disabled: busy, onclick: () => void doExport(() => exportDocument(existing.id)) }, 'Export ZIP completo'));
     }

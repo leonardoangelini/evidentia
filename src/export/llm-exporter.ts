@@ -8,7 +8,7 @@ import { excerpt } from '@/utils/text';
 import { formatMinutes, parseIso } from '@/utils/time';
 import { GLOSSARY, type GlossaryEntry } from '@/analysis/glossary';
 
-export const LLM_SCHEMA_VERSION = '2.1';
+export const LLM_SCHEMA_VERSION = '2.2';
 
 const DISCLAIMER = {
   aiDetection: false,

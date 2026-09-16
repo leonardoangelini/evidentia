@@ -16,6 +16,5 @@ export interface Session {
   toSnapshotIndex: number;
   wordCountStart: number | null;
   wordCountEnd: number | null;
-  netWordChange: number;
   authorLabels: string[];
 }

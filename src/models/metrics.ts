@@ -40,8 +40,6 @@ export interface InsertionMetrics {
   numberOfLargeInsertions: number;
   largestInsertionWords: number;
   totalWordsInLargeInsertions: number;
-  insertionsOver300Words: number;
-  insertionsOver1000Words: number;
   thresholdWords: number;
 }
 

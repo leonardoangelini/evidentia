@@ -91,7 +91,7 @@ interface Session {
   id; documentId; index;
   startedAt; endedAt; spanMs;      // dalla prima all'ultima versione del gruppo
   versionCount; fromSnapshotIndex; toSnapshotIndex;
-  wordCountStart; wordCountEnd; netWordChange;
+  wordCountStart; wordCountEnd;
   authorLabels: string[];
 }
 ```
@@ -110,8 +110,7 @@ tempo attivo/inattivo: non osservabile.
 - `writing`: `estimatedWordsAdded`, `estimatedWordsDeleted`,
   `estimatedWordsRewritten`, `netWordGrowth`
 - `insertions` (sostituisce le metriche di paste): `numberOfLargeInsertions`,
-  `largestInsertionWords`, `totalWordsInLargeInsertions`,
-  `insertionsOver300Words`, `insertionsOver1000Words`, `thresholdWords`
+  `largestInsertionWords`, `totalWordsInLargeInsertions`, `thresholdWords`
 - `revision`: `numberOfRevisionEvents`, `paragraphsRewritten`,
   `revisionIntensity` (= parole sostituite / parole finali),
   `proportionOfVersionsAfterFirstCompleteDraft` (quota di versioni dopo la
@@ -216,7 +215,7 @@ time-estimates.json     TimeEstimates
 content-evolution.json  ContentEvolution
 glossary.json    GlossaryEntry[]
 final.txt        testo della versione corrente
-llm/analysis-input.json, llm/analysis-input-compact.json (schemaVersion 2.1:
+llm/analysis-input.json, llm/analysis-input-compact.json (schemaVersion 2.2:
                  + timeEstimates, contentEvolution, glossary; il compatto omette
                  intervals e accorcia gli estratti),
 llm/analysis-prompt.md

@@ -43,6 +43,7 @@ const ENTRIES = {
   interval: { label: 'Intervallo', kind: 'osservato', meaning: 'Tempo trascorso dalla versione precedente.', use: 'Fra due versioni non è osservato nulla: un intervallo lungo non implica assenza di lavoro né la sua presenza.' },
   versionSections: { label: 'Sezioni', kind: 'derivato', meaning: 'Sezioni (titoli) in cui il testo è cambiato rispetto alla versione precedente, con parole aggiunte ed eliminate.' },
   finalWords: { label: 'Parole finali', kind: 'derivato', meaning: 'Parole della versione corrente del documento.' },
+  wordsProgress: { label: 'Parole', kind: 'derivato', meaning: 'Parole della prima versione leggibile e della versione corrente; sotto, parole aggiunte ed eliminate in tutti i passaggi fra versioni (stima dal diff).', use: 'Se la prima versione è già lunga, gran parte della stesura precede l\'osservazione (gap BEFORE_FIRST_VERSION).' },
   firstVersionWords: { label: 'Prima versione', kind: 'derivato', meaning: 'Parole contenute nella prima versione leggibile.', use: 'Se è una quota alta del testo finale, gran parte della stesura è avvenuta prima dell\'osservazione (gap BEFORE_FIRST_VERSION).' },
   calendarSpan: { label: 'Arco temporale', kind: 'osservato', meaning: 'Tempo fra la prima e l\'ultima versione della cronologia.', use: 'È un arco di calendario, non tempo di lavoro.' },
   daysWithVersions: { label: 'Giornate con versioni', kind: 'derivato', meaning: 'Numero di giorni di calendario (ora locale) in cui è stata salvata almeno una versione.' },
@@ -56,7 +57,6 @@ const ENTRIES = {
   sessionSpan: { label: 'Arco', kind: 'osservato', meaning: 'Tempo fra la prima e l\'ultima versione della sessione. Una sessione con una sola versione ha arco zero.' },
   sessionVersions: { label: 'Versioni', kind: 'osservato', meaning: 'Numero di versioni salvate nella sessione.' },
   sessionWords: { label: 'Parole', kind: 'derivato', meaning: 'Parole della prima e dell\'ultima versione leggibile della sessione.' },
-  sessionDelta: { label: 'Δ parole', kind: 'derivato', meaning: 'Differenza di parole fra l\'ultima e la prima versione della sessione. Non include le modifiche già contenute nella prima versione della sessione (vedi "Parole nette" nella scheda Tempo stimato).' },
   sessionAuthors: { label: 'Autori', kind: 'osservato', meaning: 'Etichette pseudonime di chi ha salvato versioni nella sessione.' },
   observedTotal: { label: 'Tempo osservato', kind: 'osservato', meaning: 'Somma, per tutte le sessioni, del tempo fra la prima e l\'ultima versione.', use: 'È un limite inferiore: il lavoro prima della prima versione di ogni sessione non è visibile.' },
   estimatedActiveTotal: { label: 'Tempo attivo stimato', kind: 'stima', meaning: 'Stima del tempo di lavoro nel documento: tempo osservato più un margine di avvio per ogni sessione (default 5 minuti, modificabile).', method: 'Il margine è limitato dal tempo trascorso dalla versione precedente o dalla creazione del file.', use: 'L\'attività non è osservata: il documento può essere rimasto aperto senza modifiche, e il lavoro fuori dal documento non compare. Trattalo come ordine di grandezza.' },
@@ -83,7 +83,7 @@ const ENTRIES = {
   diffDeleted: { label: '− parole', kind: 'derivato', meaning: 'Parole eliminate nel passaggio fra le due versioni.' },
   diffReplaced: { label: 'Sostituite', kind: 'derivato', meaning: 'Parole sostituite dentro paragrafi modificati (minimo fra aggiunte ed eliminate).' },
   paragraphsPDM: { label: 'Par. +/−/mod', kind: 'derivato', meaning: 'Paragrafi aggiunti / eliminati / modificati nel passaggio. Un paragrafo è "modificato" quando una versione precedente e una successiva sono accoppiate dal diff.' },
-  diffDelta: { label: 'Δ parole', kind: 'derivato', meaning: 'Variazione netta di parole nel passaggio.' },
+  diffWords: { label: '+ / − / ~', kind: 'derivato', meaning: 'Parole aggiunte, eliminate e sostituite nel passaggio dalla versione precedente. Le sostituite sono il minimo fra aggiunte ed eliminate dentro i paragrafi modificati.' },
   largeInsertions: { label: 'Grandi inserimenti', kind: 'derivato', meaning: 'Passaggi fra versioni consecutive con un aumento netto di parole almeno pari alla soglia (default 300, modificabile).', use: 'È un\'osservazione su dimensione e tempo. La provenienza del testo non è osservabile: fra le due versioni non si vede nulla.' },
   insertionParagraphs: { label: '+ paragrafi', kind: 'derivato', meaning: 'Paragrafi interamente nuovi nel passaggio.' },
   majorTransitions: { label: 'Transizioni principali', kind: 'derivato', meaning: 'I passaggi fra versioni consecutive con i cambiamenti più grandi (per parole variate o paragrafi toccati), al massimo dieci.' },
@@ -139,11 +139,11 @@ export interface GlossaryEntry extends Def {
 }
 
 export const GLOSSARY_GROUPS: Array<{ title: string; ids: GlossaryId[] }> = [
-  { title: 'Documento e versioni', ids: ['versions', 'versionIndex', 'versionLabel', 'versionDate', 'versionAuthor', 'authors', 'versionWords', 'versionDelta', 'versionParagraphs', 'versionStatus', 'versionHash', 'interval', 'versionSections', 'finalWords', 'firstVersionWords', 'calendarSpan', 'daysWithVersions', 'medianInterval'] },
-  { title: 'Sessioni e tempo', ids: ['sessions', 'sessionIndex', 'sessionStart', 'sessionEnd', 'sessionSpan', 'sessionVersions', 'sessionWords', 'sessionDelta', 'sessionAuthors', 'observedTotal', 'estimatedActiveTotal', 'observedSpan', 'leadIn', 'estimatedActive', 'netWords', 'plusMinus', 'wordsPerHour', 'wordsPerHourNet', 'wordsPerHourAdded', 'medianSessionRate', 'maxIntervalRate', 'day', 'daySessions', 'dayVersions'] },
-  { title: 'Testo e cambiamenti', ids: ['wordsAdded', 'wordsDeleted', 'wordsRewritten', 'diffType', 'diffAdded', 'diffDeleted', 'diffReplaced', 'paragraphsPDM', 'diffDelta', 'largeInsertions', 'insertionParagraphs', 'majorTransitions', 'variation', 'revisions', 'paragraphsRewritten', 'revisionIntensity', 'afterFirstDraft', 'excerpt'] },
+  { title: 'Documento e versioni', ids: ['versions', 'versionIndex', 'versionLabel', 'versionDate', 'versionAuthor', 'authors', 'versionWords', 'versionDelta', 'versionParagraphs', 'versionStatus', 'versionHash', 'interval', 'versionSections', 'finalWords', 'wordsProgress', 'firstVersionWords', 'calendarSpan', 'daysWithVersions', 'medianInterval'] },
+  { title: 'Sessioni e tempo', ids: ['sessions', 'sessionIndex', 'sessionStart', 'sessionEnd', 'sessionSpan', 'sessionVersions', 'sessionWords', 'sessionAuthors', 'observedTotal', 'estimatedActiveTotal', 'observedSpan', 'leadIn', 'estimatedActive', 'netWords', 'plusMinus', 'wordsPerHour', 'wordsPerHourNet', 'wordsPerHourAdded', 'medianSessionRate', 'maxIntervalRate', 'day', 'daySessions', 'dayVersions'] },
+  { title: 'Testo e cambiamenti', ids: ['wordsAdded', 'wordsDeleted', 'wordsRewritten', 'diffType', 'diffAdded', 'diffDeleted', 'diffReplaced', 'diffWords', 'paragraphsPDM', 'largeInsertions', 'insertionParagraphs', 'majorTransitions', 'variation', 'revisions', 'paragraphsRewritten', 'revisionIntensity', 'afterFirstDraft', 'excerpt'] },
   { title: 'Contenuti per fase', ids: ['phases', 'section', 'wordsBeforeAfter', 'sectionWordsAdded', 'sectionWordsDeleted', 'sectionFinalWords', 'sectionParagraphs', 'firstSeen', 'sessionsTouched', 'wordsByPhase', 'position', 'paragraphWords', 'lastChanged', 'variants', 'incipit', 'removedIn', 'removedSession', 'presentSince', 'abandoned'] },
-  { title: 'Timeline, copertura e integrità', ids: ['timelineTime', 'timelineEvent', 'timelineDetail', 'gaps', 'source', 'firstLast', 'lastAnalyzed', 'extractionFailures', 'warnings', 'limitations', 'chain', 'chart'] },
+  { title: 'Cronologia, copertura e integrità', ids: ['timelineTime', 'timelineEvent', 'timelineDetail', 'gaps', 'source', 'firstLast', 'lastAnalyzed', 'extractionFailures', 'warnings', 'limitations', 'chain', 'chart'] },
 ];
 
 export function term(id: GlossaryId): GlossaryEntry {

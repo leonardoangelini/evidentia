@@ -54,7 +54,7 @@ export async function buildExportFiles(dataset: DocumentDataset, settings: Setti
   };
   files['manifest.json'] = json({
     product: 'Evidentia',
-    exportVersion: '1.0',
+    exportVersion: '1.1',
     exportedAt: generatedAt,
     extensionVersion,
     documentId: dataset.document.id,

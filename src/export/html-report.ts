@@ -92,10 +92,10 @@ export function buildHtmlReport(dataset: DocumentDataset, analysis: Analysis, ge
 <h1 style="display:flex;align-items:center;gap:10px"><span style="color:var(--accent);display:inline-flex">${LOGO_MONO_SVG.replace('width="20" height="20"', 'width="28" height="28"')}</span>Evidentia — Writing Process Report</h1>
 <div class="sub">${esc(doc.name || '(senza nome)')} · ${esc(sourceLabel(doc))} · generato il ${formatDateTime(generatedAt)} · Evidentia v${esc(doc.extensionVersion)}</div>
 
-<h2>Overview</h2>
+<h2>Panoramica</h2>
 <table class="kv">${overviewRows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
 
-<h2>Process Timeline${info('chart')}</h2>
+<h2>Cronologia${info('chart')}</h2>
 ${wordCountChart(dataset, analysis)}
 <table>
 <thead><tr>${th('timelineTime')}${th('timelineEvent')}${th('timelineDetail')}</tr></thead>
@@ -108,24 +108,24 @@ ${analysis.timeline.map((t) => `<tr><td class="mono">${formatDateTime(t.time)}</
 ${snapshots.map((s, i) => { const prev = snapshots.slice(0, i).reverse().find((p) => p.extractionStatus !== 'UNAVAILABLE'); const un = s.extractionStatus === 'UNAVAILABLE'; const delta = !un && prev ? s.wordCount - prev.wordCount : null; return `<tr><td>${s.index}</td><td>${esc(s.versionLabel)}${s.isCurrent ? ' (corrente)' : ''}</td><td class="mono">${formatDateTime(s.timestamp)}</td><td>${esc(s.authorLabel ?? '–')}</td><td>${un ? '–' : formatInt(s.wordCount)}</td><td>${delta === null ? '–' : `${delta >= 0 ? '+' : ''}${formatInt(delta)}`}</td><td>${un ? '–' : s.paragraphCount}</td><td>${esc(s.extractionStatus)}${s.extractionNotes.length ? ` <span class="muted">${esc(s.extractionNotes.join('; '))}</span>` : ''}</td></tr>`; }).join('\n')}
 </tbody></table>
 
-<h2>Sessions</h2>
+<h2>Sessioni</h2>
 <p class="muted">Gruppi di versioni salvate a meno di ${analysis.options.sessionGapMinutes} minuti l'una dall'altra. Indicano quando il documento è stato salvato, non quanto tempo è stato dedicato.</p>
 <table><thead><tr>${th('sessionIndex')}${th('sessionStart')}${th('sessionEnd')}${th('sessionSpan')}${th('sessionVersions')}${th('sessionWords')}${th('sessionAuthors')}</tr></thead><tbody>
 ${sessions.map((s) => `<tr><td>${s.index + 1}</td><td class="mono">${formatDateTime(s.startedAt)}</td><td class="mono">${formatDateTime(s.endedAt)}</td><td>${s.versionCount > 1 ? formatDuration(s.spanMs) : '–'}</td><td>${s.versionCount}</td><td>${s.wordCountStart ?? '–'} → ${s.wordCountEnd ?? '–'}</td><td>${esc(s.authorLabels.join(', ') || '–')}</td></tr>`).join('\n')}
 </tbody></table>
 
-<h2>Major Transitions${info('majorTransitions')}</h2>
+<h2>Transizioni principali${info('majorTransitions')}</h2>
 ${majorTransitions.length === 0 ? '<p class="muted">Nessuna transizione di rilievo fra versioni consecutive.</p>' : `<table><thead><tr>${th('versionLabel', 'Versioni')}${th('interval')}${th('versionWords')}${th('variation')}${th('paragraphsPDM', 'Paragrafi +/−/mod')}${th('diffType')}${th('versionAuthor')}</tr></thead><tbody>
 ${majorTransitions.map((t) => `<tr><td>${esc(t.fromVersion)} → ${esc(t.toVersion)}</td><td>${t.elapsedMinutes} min</td><td>${formatInt(t.wordsBefore)} → ${formatInt(t.wordsAfter)}</td><td>${t.netChange >= 0 ? '+' : ''}${formatInt(t.netChange)}</td><td>${t.addedParagraphs}/${t.deletedParagraphs}/${t.modifiedParagraphs}</td><td>${esc(t.classification)}</td><td>${esc(t.author ?? '–')}</td></tr>`).join('\n')}
 </tbody></table>`}
 
-<h2>Large Insertions${info('largeInsertions')}</h2>
+<h2>Grandi inserimenti${info('largeInsertions')}</h2>
 ${large.length === 0 ? `<p class="muted">Nessun aumento di almeno ${m.insertions.thresholdWords} parole fra due versioni consecutive.</p>` : `<table><thead><tr>${th('versionLabel', 'Versioni')}${th('versionDate', 'Ora')}${th('interval')}${th('variation', 'Parole')}${th('insertionParagraphs')}${th('excerpt')}</tr></thead><tbody>
 ${large.map((d) => { const to = byId.get(d.toSnapshotId); const from = byId.get(d.fromSnapshotId); return `<tr><td>${esc(from?.versionLabel ?? '')} → ${esc(to?.versionLabel ?? '')}</td><td class="mono">${formatDateTime(to?.timestamp ?? generatedAt)}</td><td>${formatDuration(d.elapsedMs)}</td><td>+${formatInt(d.wordCountDelta)}</td><td>${d.paragraphsAdded}</td><td>${d.addedBlocks.slice(0, 2).map((b) => `<blockquote class="add">${esc(b.excerpt)}</blockquote>`).join('') || '<span class="muted">testo non registrato</span>'}</td></tr>`; }).join('\n')}
 </tbody></table>
 <p class="muted">Un grande inserimento fra due versioni è solo un grande inserimento: fra una versione e l'altra non è osservato nulla, e la provenienza del testo non è determinabile.</p>`}
 
-<h2>Revision Activity</h2>
+<h2>Revisioni</h2>
 ${revisions.length === 0 ? '<p class="muted">Nessun passaggio con cancellazioni o riscritture rilevanti.</p>' : `<table><thead><tr>${th('versionLabel', 'Versioni')}${th('versionDate', 'Ora')}${th('diffType')}${th('diffAdded')}${th('diffDeleted')}${th('diffReplaced')}${th('paragraphsRewritten', 'Paragrafi mod.')}${th('excerpt', 'Estratti')}</tr></thead><tbody>
 ${revisions.map((d) => `<tr><td>${esc(byId.get(d.fromSnapshotId)?.versionLabel ?? '')} → ${esc(byId.get(d.toSnapshotId)?.versionLabel ?? '')}</td><td class="mono">${formatDateTime(byId.get(d.toSnapshotId)?.timestamp ?? generatedAt)}</td><td>${esc(d.classification)}</td><td>${d.wordsAdded}</td><td>${d.wordsDeleted}</td><td>${d.wordsReplaced}</td><td>${d.paragraphsModified}</td><td>${d.deletedBlocks.slice(0, 2).map((b) => `<blockquote class="del">− ${esc(b.excerpt)}</blockquote>`).join('')}${d.addedBlocks.slice(0, 2).map((b) => `<blockquote class="add">+ ${esc(b.excerpt)}</blockquote>`).join('')}</td></tr>`).join('\n')}
 </tbody></table>`}
@@ -136,7 +136,7 @@ ${timeSection(analysis)}
 <h2>Evoluzione dei contenuti per fase${info('phases')}</h2>
 ${contentSection(analysis)}
 
-<h2>Observation Coverage</h2>
+<h2>Copertura dell'osservazione</h2>
 <table class="kv">
 <tr><th>${k('source')}</th><td>${esc(capitalize(sourceLabel(doc)))} (${o.versionsOnServer} versioni sul server, ${o.versionsStored} lette, ${o.versionsReadable} con testo)</td></tr>
 <tr><th>${k('firstLast')}</th><td>${o.firstVersionAt ? formatDateTime(o.firstVersionAt) : '–'} / ${o.lastVersionAt ? formatDateTime(o.lastVersionAt) : '–'}</td></tr>
