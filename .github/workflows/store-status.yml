@@ -4,7 +4,7 @@
 # Si sceglie l'ambiente da interrogare: `chrome-web-store-testing` (item
 # "Evidentia (Testing)") o `chrome-web-store` (estensione pubblica). Le
 # credenziali vivono negli environment, quindi interrogare la produzione
-# chiede la stessa approvazione del rilascio: è il prezzo di tenere i secret
+# passa dallo stesso environment del rilascio: è il prezzo di tenere i secret
 # fuori dalla portata di qualunque altro workflow.
 name: Store status
 

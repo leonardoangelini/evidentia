@@ -6,12 +6,18 @@ stesso repository:
 | Ambiente | Da cosa parte | Item sullo store | Environment GitHub | Deploy |
 |---|---|---|---|---|
 | **dev / testing** | ogni push su `main` | *Evidentia (Testing)* — unlisted | `chrome-web-store-testing` | automatico |
-| **produzione** | una **Release** su `vX.Y.Z` | *Evidentia* — pubblica | `chrome-web-store` | con approvazione |
+| **produzione** | un bump di `version` su `main` | *Evidentia* — pubblica | `chrome-web-store` | automatico |
 
-Un solo branch, `main`. Non esiste un branch di release: lo store tiene una
-sola versione pubblicata alla volta e non ammette di ripubblicare una version
-già usata, quindi la cosa da rendere immutabile è il *tag*, non un secondo
-puntatore mutabile da tenere allineato a mano.
+Un solo branch, `main`, e nessun gesto manuale oltre al bump: si rilascia con
+`npm version patch && git push`. Non esiste un branch di release, e il tag non
+si crea a mano — lo crea il workflow **dopo** la pubblicazione, così un tag
+esiste solo per ciò che è stato davvero inviato allo store.
+
+> **Pubblicare non è mandare online.** Il Chrome Web Store riceve la
+> submission e la mette in revisione: è Google a decidere quando
+> l'aggiornamento raggiunge chi ha l'estensione installata, di norma in ore
+> o giorni. L'automazione copre tutto ciò che sta prima; l'ultimo tratto non
+> è nostro, e non lo sarà mai.
 
 Sono due estensioni diverse per Chrome: id diversi, dati diversi,
 installabili affiancate nello stesso browser. Provare su testing non tocca
@@ -29,18 +35,19 @@ flowchart LR
     A["commit su main"] --> B["CI: typecheck, test, ZIP"]
     B --> C["Deploy testing<br/>Evidentia (Testing)"]
     C --> D["prova manuale<br/>sul browser"]
-    D --> E["bump version<br/>+ tag vX.Y.Z"]
-    E --> F["Release pubblicata<br/>su GitHub"]
-    F --> G["Release: approvazione"]
-    G --> H["Evidentia<br/>pubblica"]
+    D --> E["npm version patch<br/>+ push"]
+    E --> F["Release: pubblica<br/>sullo store"]
+    F --> G["tag vX.Y.Z<br/>+ note di rilascio"]
+    F --> H["revisione di Google<br/>ore o giorni"]
+    H --> I["Evidentia<br/>aggiornata"]
 ```
 
 1. Si lavora su `main`. Ogni push esegue la CI e, se tocca il codice,
    aggiorna l'item di testing sullo store.
 2. Si prova l'estensione di testing installata dal browser.
-3. Quando main è pronto: si alza la `version` in `package.json`, si tagga e
-   si pubblica una Release di GitHub.
-4. Il workflow *Release* si ferma in attesa di approvazione, poi pubblica.
+3. Quando main è pronto: `npm version patch && git push`. Nient'altro.
+4. *Release* vede la `version` cambiata, verifica che quel tag non esista già,
+   pubblica e poi crea tag e Release con le note.
 
 ### Workflow
 
@@ -49,7 +56,7 @@ flowchart LR
 | [`ci.yml`](../.github/workflows/ci.yml) | typecheck, test, ZIP di verifica su ogni push e PR. Non pubblica |
 | [`publish.yml`](../.github/workflows/publish.yml) | la procedura di pubblicazione, una sola volta; invocata dagli altri due |
 | [`deploy-testing.yml`](../.github/workflows/deploy-testing.yml) | push su `main` → item di testing |
-| [`release.yml`](../.github/workflows/release.yml) | Release pubblicata → item pubblico |
+| [`release.yml`](../.github/workflows/release.yml) | bump di `version` su `main` → item pubblico, poi tag e Release |
 | [`store-status.yml`](../.github/workflows/store-status.yml) | stato di un item, a scelta. Sola lettura |
 
 Testing e produzione passano dallo **stesso** `publish.yml`: la procedura di
@@ -140,22 +147,22 @@ La chiave PEM contiene a-capo: si conserva in base64 e il workflow la decodifica
 node -p "Buffer.from(require('./sa.json').private_key).toString('base64')"
 ```
 
-### Approvazione manuale della produzione
+### Approvazione: nessuna, di proposito
 
-Su `chrome-web-store`, *Required reviewers* con te stesso: il job si ferma in
-attesa del tuo OK prima di caricare qualsiasi cosa. Su
-`chrome-web-store-testing` **non** metterli, altrimenti ogni push su main
-aspetterebbe un click e il senso dell'ambiente di sviluppo verrebbe meno.
+Su **nessuno** dei due environment vanno messi i *Required reviewers*. Il
+gesto deliberato è già il bump di `version`: chiedere un'approvazione dopo
+significherebbe far confermare due volte la stessa intenzione, e il click di
+troppo si trasforma presto in un click distratto.
 
-Limita anche i ref che possono usare ciascun environment (*Deployment
-branches and tags*): `main` per `chrome-web-store-testing`; per
-`chrome-web-store` il pattern di tag **`v*`** più il branch **`main`**.
+Il gate serviva quando un trigger poteva scattare per sbaglio — un tag spinto
+a mano, un merge su un branch di release. Ora l'unico innesco è una riga di
+`package.json` che cambia, e chi la cambia sa cosa sta facendo. Resta il dry
+run per i rilasci delicati.
 
-Il tag `v*` è il ref con cui gira una release. Il `main` serve perché
-*Release* in `dry_run` e *Store status* sull'item pubblico si lanciano da
-lì: senza, si perderebbero i due modi di verificare la produzione senza
-pubblicare. Ciò che protegge quell'environment sono i *required reviewers*,
-non il ref: nessun deploy parte senza il click.
+Limita invece i ref che possono usare ciascun environment (*Deployment
+branches and tags*): **`main`** per entrambi. È l'unico ref da cui gira
+qualcosa — pubblicazione, dry run e *Store status* — e basta a impedire che
+un branch qualunque pubblichi.
 
 > Su un repository pubblico i secret **non** sono esposti alle pull request
 > provenienti da un fork: GitHub non li passa. I workflow di deploy non
@@ -165,37 +172,38 @@ non il ref: nessun deploy parte senza il click.
 
 ```sh
 git checkout main && git pull
-npm version patch          # alza package.json, committa e crea il tag vX.Y.Z
-git push --follow-tags
-
-gh release create "v$(node -p "require('./package.json').version")" --generate-notes
+npm version patch --no-git-tag-version   # alza package.json; il tag lo crea la CI
+git commit -am "chore: v$(node -p "require('./package.json').version")"
+git push
 ```
 
-L'ultimo comando avvia *Release*. Poi approva da *Actions* o dalla notifica.
+Fine. Il workflow *Release* si accorge che `package.json` è cambiato,
+controlla che il tag `v<version>` non esista già, pubblica sullo store e solo
+allora crea tag e Release con le note generate.
 
-Il job `guard` confronta il tag della release con la `version` di
-`package.json` e si ferma se non coincidono: è la rete contro il "ho
-dimenticato di alzare la version", che altrimenti si scoprirebbe solo quando
-lo store rigetta l'upload a metà workflow.
+Il controllo sul tag è la rete contro il "ho dimenticato di alzare la
+version": un `package.json` che cambia per una dipendenza non fa partire
+nessuna pubblicazione, e una version già rilasciata viene saltata con un
+avviso invece di finire in un upload che lo store rigetta.
 
-### Perché una Release e non un push di tag
+### Perché il tag lo crea la CI, dopo
 
-`on: push: tags` esegue il workflow **presente nel commit taggato**: taggare
-un commit vecchio fa girare la versione vecchia di `release.yml`, con i
-trigger e le protezioni di allora. È successo davvero, il 15 settembre 2026:
-un tag messo a posteriori su un commit di due giorni prima ha avviato il
-percorso di pubblicazione reale, fermato solo dai *required reviewers*
-dell'environment. `on: release` prende sempre il workflow dal branch di
-default, e quel guasto non è più possibile.
+Un tag messo a mano *prima* è una promessa che il rilascio non ha ancora
+mantenuto: se la pubblicazione fallisce, resta a dire il falso. Creato dopo,
+un tag significa esattamente "questo è stato inviato allo store".
 
-In più un tag si crea per sbaglio con niente — `npm version` ne crea uno,
-`git push --tags` lo spinge — mentre pubblicare una Release è un gesto
-esplicito, che per giunta produce le note di rilascio.
+C'è anche un motivo tecnico per cui la pubblicazione non parte dall'evento
+`release`: una Release creata con il `GITHUB_TOKEN` non fa scattare altri
+workflow — GitHub lo impedisce per evitare ricorsioni — quindi la catena
+"crea release → pubblica" si spezzerebbe da sola.
+
+> Attenzione a `npm version` senza `--no-git-tag-version`: crea un tag
+> locale che, se spinto, farebbe saltare il rilascio successivo — il workflow
+> vedrebbe quella version come già rilasciata.
 
 Prima di un rilascio delicato: *Actions → Release → Run workflow* con
-`dry_run` su `true`. Verifica credenziali e ZIP senza caricare nulla e senza
-toccare lo store; senza una release da confrontare, il `guard` si limita a
-stampare la version.
+`dry_run` su `true`. Verifica credenziali e pacchetto senza caricare nulla,
+senza creare tag, e gira anche su una version già pubblicata.
 
 ## 5. Versioni
 

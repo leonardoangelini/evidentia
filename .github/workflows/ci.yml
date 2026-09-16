@@ -1,6 +1,6 @@
 # Verifica su ogni push e pull request: typecheck, test, build dello ZIP.
 # Non pubblica: il deploy sull'item di testing è in deploy-testing.yml,
-# quello sull'estensione pubblica in release.yml, su una Release di GitHub.
+# quello sull'estensione pubblica in release.yml, su un bump di version.
 name: CI
 
 on:

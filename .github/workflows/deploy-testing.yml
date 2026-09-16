@@ -3,7 +3,7 @@
 # installato come estensione vera, non come cartella scompattata.
 #
 # È un item separato, con id e listing propri: non tocca in alcun modo
-# l'estensione pubblica, che si rilascia pubblicando una Release di GitHub
+# l'estensione pubblica, che si rilascia alzando la version in package.json
 # (vedi release.yml).
 name: Deploy testing
 

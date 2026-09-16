@@ -1,26 +1,28 @@
 # Ambiente di produzione: l'estensione pubblica sul Chrome Web Store.
 #
-# Si rilascia pubblicando una **Release** di GitHub sul tag `vX.Y.Z`:
+# Rilasciare è `npm version patch && git push`. Questo workflow parte quando
+# `package.json` cambia su main e pubblica se quella version non è ancora
+# stata rilasciata, cioè se il tag `vX.Y.Z` non esiste ancora. A
+# pubblicazione avvenuta crea tag e Release con le note.
 #
-#     npm version patch && git push --follow-tags
-#     gh release create v0.1.1 --generate-notes
+# Perché la pubblicazione sta qui e non su `release: published`: una Release
+# creata con il GITHUB_TOKEN non fa partire altri workflow — GitHub lo
+# impedisce per evitare ricorsioni — quindi il tag arriva dopo la
+# pubblicazione, non prima. Che è anche più onesto: esiste un tag solo per
+# ciò che è stato davvero inviato allo store.
 #
-# Non su push di un tag, di proposito. Un evento `push: tags` esegue il
-# workflow presente *nel commit taggato*, quindi taggare un commit vecchio
-# fa girare la versione vecchia di questo file; un evento `release` prende
-# il workflow dal branch di default, sempre. In più un tag si crea per
-# sbaglio con niente (`npm version`, `git push --tags`), una release no.
-#
-# Se all'environment `chrome-web-store` sono configurati dei reviewer, il job
-# resta in attesa di approvazione: ogni submission entra nella review di
-# Google, quindi il click è voluto.
+# Pubblicare significa **inviare a revisione**: è Google a decidere quando
+# l'aggiornamento raggiunge chi ha l'estensione installata.
 #
 # Secret e variabili richiesti: vedi docs/release.md.
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+    # Solo un cambio di package.json può essere un rilascio. Il controllo sul
+    # tag qui sotto distingue il bump di version da un cambio di dipendenze.
+    paths: ['package.json']
   workflow_dispatch:
     inputs:
       dry_run:
@@ -36,36 +38,90 @@ permissions:
   contents: read
 
 jobs:
-  guard:
-    name: Il tag coincide con package.json
+  check:
+    name: C'è una version nuova da rilasciare?
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      release: ${{ steps.check.outputs.release }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Serve la storia completa: i tag sono il registro di ciò che è
+          # già stato pubblicato.
+          fetch-depth: 0
 
-      # Lo store rifiuta un upload con una version già pubblicata, e lo dice
-      # a metà workflow. Qui il disallineamento fra il tag della release e la
-      # version del pacchetto si vede subito, prima di costruire alcunché.
-      - name: Confronta tag e version
+      - id: check
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: |
           set -euo pipefail
           VERSION=$(node -p "require('./package.json').version")
-          if [ -z "$TAG" ]; then
-            echo "Esecuzione manuale, nessuna release da confrontare: package.json dice $VERSION."
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Una prova a vuoto non rilascia niente: gira anche su una version
+          # già pubblicata, serve proprio a provare la procedura.
+          if [ "$DISPATCH_DRY_RUN" = "true" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Prova a vuoto su v$VERSION: nessun caricamento."
             exit 0
           fi
-          echo "release: $TAG — package.json: $VERSION"
-          if [ "$TAG" != "v$VERSION" ]; then
-            echo "::error::La release è sul tag $TAG ma package.json dice $VERSION: la version non è stata alzata, o il tag è sbagliato."
-            exit 1
+
+          # Si rilascia solo se la version è cambiata *in questo push*. Senza
+          # questo, aggiungere una dipendenza pubblicherebbe una version
+          # alzata giorni prima e mai rilasciata.
+          BEFORE="${{ github.event.before }}"
+          PREV=""
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE:package.json" 2>/dev/null; then
+            git show "$BEFORE:package.json" > /tmp/prev-package.json
+            PREV=$(node -p "require('/tmp/prev-package.json').version")
+          fi
+
+          if [ -n "$PREV" ] && [ "$PREV" = "$VERSION" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::package.json è cambiato ma la version è sempre $VERSION: nessuna pubblicazione."
+            exit 0
+          fi
+
+          # Seconda rete: un tag esistente dice che quella version è già
+          # stata inviata allo store, che la rifiuterebbe come duplicata.
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v$VERSION risulta già rilasciata (il tag esiste). Nessuna pubblicazione."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::version $PREV → $VERSION, mai rilasciata: si pubblica sullo store."
           fi
 
   production:
-    needs: guard
+    needs: check
+    if: needs.check.outputs.release == 'true'
     uses: ./.github/workflows/publish.yml
     with:
       environment: chrome-web-store
       channel: production
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
+
+  release:
+    name: Tag e Release
+    needs: [check, production]
+    # Una prova a vuoto non ha pubblicato nulla: non lascia un tag a dire il
+    # contrario.
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Crea v<version> con le note
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "v$VERSION" \
+            --target "$GITHUB_SHA" \
+            --title "Evidentia v$VERSION" \
+            --generate-notes

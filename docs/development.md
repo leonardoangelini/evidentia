@@ -128,10 +128,10 @@ usa la build "Chrome for Testing".
 Un solo branch, `main`. Ogni push esegue la CI e, se tocca il codice,
 aggiorna l'item *Evidentia (Testing)* dello store.
 
-Si rilascia alzando la `version`, taggando e pubblicando una Release di
-GitHub sul tag `vX.Y.Z`: è quella a far partire la pubblicazione
-sull'estensione pubblica, con approvazione. Procedura completa in
-[release.md](release.md).
+Si rilascia alzando la `version` in `package.json` e spingendo: la CI se ne
+accorge, pubblica sull'estensione pubblica e crea tag e Release. Pubblicare
+significa inviare a revisione — quando l'aggiornamento arriva agli utenti lo
+decide Google. Procedura completa in [release.md](release.md).
 
 ### Variabili d'ambiente della build
 
@@ -150,4 +150,4 @@ EVIDENTIA_CHANNEL=production npm run zip   # pacchetto identico a quello pubblic
 ## Pubblicazione
 
 Vedi [release.md](release.md): i due item sullo store, i secret dei due
-environment, l'approvazione manuale e il flusso di promozione.
+environment e il rilascio automatico a partire dal bump di `version`.
