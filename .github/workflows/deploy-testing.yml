@@ -3,8 +3,8 @@
 # installato come estensione vera, non come cartella scompattata.
 #
 # È un item separato, con id e listing propri: non tocca in alcun modo
-# l'estensione pubblica. La promozione a produzione è un merge su
-# `production` (vedi release.yml).
+# l'estensione pubblica, che si rilascia pubblicando una Release di GitHub
+# (vedi release.yml).
 name: Deploy testing
 
 on:

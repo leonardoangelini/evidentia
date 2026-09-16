@@ -1,20 +1,26 @@
 # Ambiente di produzione: l'estensione pubblica sul Chrome Web Store.
 #
-# Si rilascia promuovendo main su `production` (merge o fast-forward). Se
-# all'environment `chrome-web-store` sono configurati dei reviewer, il job
+# Si rilascia pubblicando una **Release** di GitHub sul tag `vX.Y.Z`:
+#
+#     npm version patch && git push --follow-tags
+#     gh release create v0.1.1 --generate-notes
+#
+# Non su push di un tag, di proposito. Un evento `push: tags` esegue il
+# workflow presente *nel commit taggato*, quindi taggare un commit vecchio
+# fa girare la versione vecchia di questo file; un evento `release` prende
+# il workflow dal branch di default, sempre. In più un tag si crea per
+# sbaglio con niente (`npm version`, `git push --tags`), una release no.
+#
+# Se all'environment `chrome-web-store` sono configurati dei reviewer, il job
 # resta in attesa di approvazione: ogni submission entra nella review di
 # Google, quindi il click è voluto.
-#
-# La version di package.json deve essere stata alzata: lo store rifiuta un
-# upload con una version già pubblicata, e il controllo qui sotto lo dice
-# subito invece di far fallire l'upload a metà workflow.
 #
 # Secret e variabili richiesti: vedi docs/release.md.
 name: Release
 
 on:
-  push:
-    branches: [production]
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -31,20 +37,27 @@ permissions:
 
 jobs:
   guard:
-    name: La version è nuova
+    name: Il tag coincide con package.json
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
-      - name: Il tag v<version> non esiste già
+      # Lo store rifiuta un upload con una version già pubblicata, e lo dice
+      # a metà workflow. Qui il disallineamento fra il tag della release e la
+      # version del pacchetto si vede subito, prima di costruire alcunché.
+      - name: Confronta tag e version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
           VERSION=$(node -p "require('./package.json').version")
-          echo "package.json: $VERSION"
-          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
-            echo "::error::Il tag v$VERSION esiste già: la version di package.json non è stata alzata prima della promozione."
+          if [ -z "$TAG" ]; then
+            echo "Esecuzione manuale, nessuna release da confrontare: package.json dice $VERSION."
+            exit 0
+          fi
+          echo "release: $TAG — package.json: $VERSION"
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "::error::La release è sul tag $TAG ma package.json dice $VERSION: la version non è stata alzata, o il tag è sbagliato."
             exit 1
           fi
 
@@ -56,23 +69,3 @@ jobs:
       channel: production
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
-
-  tag:
-    name: Tag della release
-    needs: production
-    # Un dry run non ha pubblicato nulla: non lascia un tag a dire il contrario.
-    if: ${{ !inputs.dry_run }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Crea v<version>
-        run: |
-          set -euo pipefail
-          VERSION=$(node -p "require('./package.json').version")
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "v$VERSION" -m "Evidentia v$VERSION"
-          git push origin "v$VERSION"

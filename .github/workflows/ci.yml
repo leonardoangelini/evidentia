@@ -1,11 +1,11 @@
 # Verifica su ogni push e pull request: typecheck, test, build dello ZIP.
 # Non pubblica: il deploy sull'item di testing è in deploy-testing.yml,
-# quello sull'estensione pubblica in release.yml.
+# quello sull'estensione pubblica in release.yml, su una Release di GitHub.
 name: CI
 
 on:
   push:
-    branches: [main, production]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 

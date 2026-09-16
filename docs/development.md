@@ -125,13 +125,13 @@ usa la build "Chrome for Testing".
 
 ## Rami e ambienti
 
-| Branch | Ambiente | Cosa succede a ogni push |
-|---|---|---|
-| `main` | sviluppo | CI + deploy sull'item *Evidentia (Testing)* dello store |
-| `production` | produzione | Release sull'estensione pubblica, con approvazione |
+Un solo branch, `main`. Ogni push esegue la CI e, se tocca il codice,
+aggiorna l'item *Evidentia (Testing)* dello store.
 
-Si lavora su `main`; si rilascia alzando la `version` e promuovendo `main` su
-`production` con un merge fast-forward.
+Si rilascia alzando la `version`, taggando e pubblicando una Release di
+GitHub sul tag `vX.Y.Z`: è quella a far partire la pubblicazione
+sull'estensione pubblica, con approvazione. Procedura completa in
+[release.md](release.md).
 
 ### Variabili d'ambiente della build
 
