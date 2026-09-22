@@ -5,6 +5,7 @@
  */
 import type { Analysis } from '@/analysis';
 import type { DemoCaseId } from '@/demo/cases';
+import type { DocumentLocator } from '@/import/document-locator';
 import type { ImportProgress } from '@/import/version-importer';
 import type { AnalyzedDocument, DocumentDataset, DocumentProvider, Settings } from '@/models';
 import type { ViewId } from './tabs';
@@ -22,8 +23,8 @@ export interface State {
   progress: ImportProgress | null;
   /** Server of the import in progress or just failed, for the error hint. */
   importProvider: DocumentProvider | null;
-  /** Google import waiting for the optional host permission (needs a click). */
-  pendingGoogleImport: { url: string; trigger: 'MANUAL' | 'REFRESH' } | null;
+  /** Import waiting for an optional host permission (Chrome grants it only from a click). */
+  pendingPermission: { url: string; trigger: 'MANUAL' | 'REFRESH'; locator: DocumentLocator } | null;
 }
 
 export type ExportKind = 'docx' | 'md' | 'zip';
@@ -42,4 +43,5 @@ export interface ViewContext {
   deleteAll(): Promise<void>;
   saveSettings(next: Settings): Promise<void>;
   disconnectGoogle(): Promise<void>;
+  revokeSharePoint(): Promise<void>;
 }

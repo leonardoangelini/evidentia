@@ -77,20 +77,16 @@ Evidentia has a single purpose: to let a teacher review the version history of o
 Stores the user's own settings (privacy mode, session threshold, session start-up margin, optional OAuth client id) in chrome.storage.local, and keeps the short-lived Google OAuth access token in chrome.storage.session (memory only). No document content and no personal data are stored through this permission.
 ```
 
-### Permesso `tabs`
+### Permesso `activeTab`
 
 ```
-Reads the URL of the active tab so the popup can recognise which SharePoint or Google Docs document the teacher is currently viewing. Tab contents are never read and no other tab is accessed.
+When the teacher clicks the extension icon, the popup reads the URL of the active tab to recognise which SharePoint or Google Docs document is open. activeTab grants this only for the tab the teacher clicked on, only at that moment. Tab contents are never read and no other tab is accessed.
 ```
 
-> Probabilmente eliminabile: con `host_permissions` su `*.sharepoint.com`,
-> `chrome.tabs.query` restituisce già l'URL per quelle tab senza il permesso
-> `tabs`. Un permesso in meno è una giustificazione in meno da difendere.
-
-### Host permissions (`*://*.sharepoint.com/*` e varianti)
+### Optional host permissions (`https://*.sharepoint.com/*`)
 
 ```
-The extension reads the version history and the version contents of one document from the SharePoint site the teacher is already signed into. Host permissions are required so that these read-only GET requests, issued from the extension's own pages, carry the teacher's existing Microsoft 365 session cookies. The list is restricted to SharePoint Online hosts (*.sharepoint.com, plus the .us and -df variants). The extension requests no <all_urls> permission, injects no content script and runs no background service worker.
+Requested at runtime, from a click, for the one SharePoint site that hosts the document being analysed (for example https://school-my.sharepoint.com/*), never for all of *.sharepoint.com at once. The extension then reads the version history and the version contents of that document with read-only GET requests issued from its own pages, which carry the teacher's existing Microsoft 365 session cookies. Granted sites can be revoked from the extension settings. The extension requests no <all_urls> permission, injects no content script and runs no background service worker.
 ```
 
 ### Permesso `identity`

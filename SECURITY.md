@@ -26,9 +26,12 @@ Utile saperlo prima di segnalare:
 
 - L'estensione non ha né service worker né content script. Tutto avviene nelle
   sue pagine (popup e Process View).
-- I permessi host sono limitati a `*.sharepoint.com`, `*.sharepoint-df.com`,
-  `*.sharepoint.us`. Quelli Google (`googleapis.com`, `docs.google.com`) sono
-  **opzionali** e vengono chiesti solo al primo documento Google Docs.
+- Nessun permesso host è obbligatorio. SharePoint è **opzionale** e viene
+  concesso un sito alla volta (l'origin del documento, dentro
+  `https://*.sharepoint.com/*`); gli host Google (`googleapis.com`,
+  `docs.google.com`) sono **opzionali** e vengono chiesti solo al primo
+  documento Google Docs. L'URL della tab si legge con `activeTab`, non con
+  `tabs`.
 - Le chiamate a SharePoint usano i cookie di sessione dell'utente
   (`credentials: 'include'`) e sono in sola lettura.
 - Le chiamate a Google usano un access token OAuth (implicit grant, nessun

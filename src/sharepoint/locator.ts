@@ -25,7 +25,7 @@ const GUID_COMPACT = /^w?([0-9a-f]{32})$/i;
 
 export function isSharePointHost(hostname: string): boolean {
   const h = hostname.toLowerCase();
-  return h.endsWith('.sharepoint.com') || h.endsWith('.sharepoint-df.com') || h.endsWith('.sharepoint.us');
+  return h.endsWith('.sharepoint.com');
 }
 
 export function parseSharePointLocator(rawUrl: string): SharePointLocator | null {

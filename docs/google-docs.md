@@ -8,7 +8,7 @@ perché ogni revisione viene esportata in DOCX.
 
 ## 1. Come si riconosce il documento
 
-Dall'URL della tab (`chrome.tabs`, senza content script):
+Dall'URL della tab (`activeTab`, concesso dal click sull'icona; nessun content script):
 
 ```text
 https://docs.google.com/document/d/<fileId>/edit

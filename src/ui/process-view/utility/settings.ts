@@ -38,6 +38,8 @@ export function renderSettings(ctx: ViewContext): HTMLElement {
     h('label', {}, 'Intervallo fra versioni segnalato come gap dopo (ore)'), longGap,
     h('label', {}, 'Stima del tempo: margine di avvio per sessione (minuti, lavoro prima della prima versione salvata)'), leadIn,
     h('label', {}, 'Numero massimo di versioni da scaricare'), maxV,
+    h('h3', {}, 'SharePoint / OneDrive'),
+    h('div', { class: 'row' }, h('button', { onclick: () => void ctx.revokeSharePoint() }, 'Revoca l\'accesso ai siti SharePoint'), h('span', { class: 'muted small' }, 'Evidentia contatta solo i siti SharePoint che hai autorizzato, uno alla volta, alla prima analisi. Revocando, li chiederà di nuovo alla prossima.')),
     h('h3', {}, 'Google Docs'),
     h('label', {}, 'Client ID OAuth 2.0 (progetto Google Cloud della scuola; redirect URI ' + googleRedirectUrl() + ')'), googleClientId,
     h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { onclick: () => void ctx.disconnectGoogle() }, 'Disconnetti Google e revoca il permesso'), h('span', { class: 'muted small' }, 'Dimentica l\'autorizzazione e ritira l\'accesso a googleapis.com / docs.google.com fino alla prossima analisi di un documento Google.')),

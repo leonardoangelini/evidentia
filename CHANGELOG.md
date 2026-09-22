@@ -8,6 +8,22 @@ Questo file è incluso nell'estensione: è quello che la scheda *Info* mostra
 senza bisogno di collegarsi a internet. Va aggiornato **prima** di alzare la
 `version` in `package.json` (vedi [docs/release.md](docs/release.md)).
 
+## 0.3.0 — 2026-09-21
+
+Meno permessi, chiesti solo quando servono.
+
+- **Nessun avviso sui permessi all'installazione.** Spariscono "Leggere la
+  cronologia di navigazione" e "Leggere e modificare i tuoi dati su tutti i
+  siti sharepoint.com": l'URL della tab si legge solo quando clicchi l'icona.
+- **Un sito SharePoint alla volta.** Alla prima analisi di un documento
+  Evidentia chiede, con un click, l'accesso al solo sito SharePoint della
+  scuola (per esempio `scuola-my.sharepoint.com`), non a tutti. Chi aveva già
+  installato l'estensione riceve la stessa richiesta alla prossima analisi.
+- Nelle **Impostazioni**, *Revoca l'accesso ai siti SharePoint* ritira i
+  siti autorizzati.
+- Non sono più riconosciuti i domini `sharepoint-df.com` (ambiente interno di
+  Microsoft) e `sharepoint.us` (cloud governativo statunitense).
+
 ## 0.2.1 — 2026-09-16
 
 - Il grafico **Parole per versione nel tempo** risponde al passaggio del

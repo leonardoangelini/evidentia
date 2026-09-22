@@ -58,11 +58,17 @@ docente; l'interfaccia suggerisce pseudonimi.
 ## Permessi richiesti (Manifest V3)
 
 - `storage`: impostazioni.
-- `tabs`: leggere l'URL della tab attiva per riconoscere il documento.
-- `host_permissions` su `*.sharepoint.com` (e varianti `sharepoint-df.com`,
-  `sharepoint.us`): necessarie perché le fetch dalle pagine
-  dell'estensione portino i cookie di sessione. Nessun `<all_urls>`,
-  nessun content script, nessun service worker.
+Nessuno di questi permessi produce un avviso al momento dell'installazione.
+
+- `activeTab`: leggere l'URL della tab attiva, solo quando il docente clicca
+  l'icona, per riconoscere il documento.
+- `optional_host_permissions` su `https://*.sharepoint.com/*`: alla prima
+  analisi, con un click, si concede l'accesso al solo sito SharePoint del
+  documento (per esempio `scuola-my.sharepoint.com`), non a tutti. Serve
+  perché le fetch dalle pagine dell'estensione portino i cookie di
+  sessione. Revocabili da *Impostazioni → Revoca l'accesso ai siti
+  SharePoint*. Nessun `<all_urls>`, nessun content script, nessun service
+  worker.
 - `identity`: apre la schermata di consenso Google (`launchWebAuthFlow`)
   per ottenere il token della Drive API. Nessun accesso all'account del
   browser.

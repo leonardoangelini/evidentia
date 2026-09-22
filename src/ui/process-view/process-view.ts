@@ -10,6 +10,7 @@ import { importVersionHistory } from '@/import/version-importer';
 import { parseDocumentLocator, providerHint } from '@/import/document-locator';
 import { signOutGoogle } from '@/google/google-auth';
 import { hasGooglePermission, removeGooglePermission, requestGooglePermission } from '@/google/permissions';
+import { hasSharePointPermission, removeSharePointPermissions, requestSharePointPermission } from '@/sharepoint/permissions';
 import { documentRepository, importDataset, loadDataset } from '@/storage/repositories';
 import { loadSettings, saveSettings } from '@/storage/settings-store';
 import { getExtensionVersion } from '@/utils/version';
@@ -43,7 +44,7 @@ export function mountProcessView(root: HTMLElement): void {
     message: '',
     progress: null,
     importProvider: null,
-    pendingGoogleImport: null,
+    pendingPermission: null,
   };
   // Un vecchio hash (#timeline, #gaps…) viene riscritto con la scheda che lo ha assorbito.
   if (location.hash && location.hash !== `#${initialTab}`) history.replaceState(null, '', `${location.search}#${initialTab}`);
@@ -74,10 +75,11 @@ export function mountProcessView(root: HTMLElement): void {
     }
     state.settings = await loadSettings();
     state.importProvider = locator.provider;
-    state.pendingGoogleImport = null;
-    if (locator.provider === 'GOOGLE_DOCS' && !(await hasGooglePermission())) {
+    state.pendingPermission = null;
+    const permitted = locator.provider === 'GOOGLE_DOCS' ? await hasGooglePermission() : await hasSharePointPermission(locator.host);
+    if (!permitted) {
       // Optional host permission: Chrome only grants it from a click, so ask and resume from the button.
-      state.pendingGoogleImport = { url, trigger };
+      state.pendingPermission = { url, trigger, locator };
       state.progress = null;
       state.message = '';
       return render();
@@ -132,24 +134,33 @@ export function mountProcessView(root: HTMLElement): void {
     if (p.phase === 'ERROR') progressBox.append(h('div', { class: 'muted small' }, providerHint(state.importProvider ?? 'SHAREPOINT')));
   }
 
-  /** Shown when a Google document was requested and the Google hosts are not yet permitted. */
-  function renderGooglePermissionRequest(): HTMLElement {
-    const pending = state.pendingGoogleImport as NonNullable<State['pendingGoogleImport']>;
+  /** Shown when the server of the requested document is not yet a permitted host. */
+  function renderPermissionRequest(): HTMLElement {
+    const pending = state.pendingPermission as NonNullable<State['pendingPermission']>;
+    const { locator } = pending;
+    const google = locator.provider === 'GOOGLE_DOCS';
     const grant = async (): Promise<void> => {
-      const granted = await requestGooglePermission();
+      const granted = google ? await requestGooglePermission() : await requestSharePointPermission(locator.host);
       if (!granted) {
-        state.message = 'Permesso non concesso: senza l\'accesso a Google Drive le revisioni non possono essere lette.';
+        state.message = google
+          ? 'Permesso non concesso: senza l\'accesso a Google Drive le revisioni non possono essere lette.'
+          : `Permesso non concesso: senza l'accesso a ${locator.host} le versioni non possono essere lette.`;
         return render();
       }
-      state.pendingGoogleImport = null;
+      state.pendingPermission = null;
       await runImport(pending.url, pending.trigger);
     };
+    const title = google ? 'Accesso a Google Drive' : `Accesso a ${locator.host}`;
+    const text = google
+      ? 'Per leggere le revisioni di un documento Google Docs, Evidentia deve poter contattare www.googleapis.com e docs.google.com dalle proprie pagine. Il permesso vale solo per queste richieste, in sola lettura, con l\'autorizzazione Google che ti verrà chiesta subito dopo; si può revocare dalle impostazioni.'
+      : `Per leggere la cronologia delle versioni, Evidentia deve poter contattare ${locator.host} con la tua sessione Microsoft 365. Il permesso vale solo per questo sito SharePoint, non per gli altri; Evidentia fa solo letture, anche se Chrome lo descrive come "leggere e modificare". Si può revocare dalle impostazioni.`;
+    const label = google ? 'Consenti l\'accesso a Google Drive e analizza' : `Consenti l'accesso a ${locator.host} e analizza`;
     return h(
       'div',
       { class: 'notice' },
-      h('strong', {}, 'Accesso a Google Drive'),
-      h('div', {}, 'Per leggere le revisioni di un documento Google Docs, Evidentia deve poter contattare www.googleapis.com e docs.google.com dalle proprie pagine. Il permesso vale solo per queste richieste, in sola lettura, con l\'autorizzazione Google che ti verrà chiesta subito dopo; si può revocare dalle impostazioni.'),
-      h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'primary', onclick: () => void grant() }, 'Consenti l\'accesso a Google Drive e analizza'), h('button', { onclick: () => { state.pendingGoogleImport = null; render(); } }, 'Annulla')),
+      h('strong', {}, title),
+      h('div', {}, text),
+      h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'primary', onclick: () => void grant() }, label), h('button', { onclick: () => { state.pendingPermission = null; render(); } }, 'Annulla')),
     );
   }
 
@@ -170,7 +181,7 @@ export function mountProcessView(root: HTMLElement): void {
       renderProgress();
       main.appendChild(progressBox);
     }
-    if (state.pendingGoogleImport) main.appendChild(renderGooglePermissionRequest());
+    if (state.pendingPermission) main.appendChild(renderPermissionRequest());
     if (state.message) main.appendChild(h('div', { class: 'notice status' }, state.message));
     if (!isTab(state.tab)) return void main.appendChild(renderUtility(state.tab));
     if (!hasData) {
@@ -246,7 +257,13 @@ export function mountProcessView(root: HTMLElement): void {
     render();
   }
 
-  const ctx: ViewContext = { state, render, setTab, select, runImport, selectDocument, loadDemo, doExport, deleteCurrent, deleteAll, saveSettings: saveAndReload, disconnectGoogle };
+  async function revokeSharePoint(): Promise<void> {
+    const hosts = await removeSharePointPermissions();
+    state.message = hosts.length ? `Accesso revocato: ${hosts.join(', ')}. Alla prossima analisi Evidentia lo chiederà di nuovo.` : 'Nessun sito SharePoint autorizzato.';
+    render();
+  }
+
+  const ctx: ViewContext = { state, render, setTab, select, runImport, selectDocument, loadDemo, doExport, deleteCurrent, deleteAll, saveSettings: saveAndReload, disconnectGoogle, revokeSharePoint };
 
   window.addEventListener('hashchange', () => {
     const next = parseHash(location.hash);

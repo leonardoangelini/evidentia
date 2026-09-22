@@ -41,8 +41,13 @@ firma `PK`) e di una versione storica (`application/vnd.openxmlformats-...`).
 
 ## 3. Autenticazione
 
-Le pagine dell'estensione, avendo host permission su `*.sharepoint.com`,
-inviano i cookie di sessione (FedAuth/rtFa). Se la sessione è scaduta o il
+L'host SharePoint è un permesso opzionale (`optional_host_permissions` su
+`https://*.sharepoint.com/*`): alla prima analisi la Process View chiede,
+con un click, l'accesso al solo sito del documento (per esempio
+`https://scuola-my.sharepoint.com/*`). Una volta concesso, le pagine
+dell'estensione inviano i cookie di sessione (FedAuth/rtFa) come con un
+permesso obbligatorio. *Impostazioni → Revoca l'accesso ai siti SharePoint*
+li ritira tutti. Se la sessione è scaduta o il
 browser è stato riavviato senza "Resta connesso", la API risponde
 `403 Attempted to perform an unauthorized operation` e l'estensione mostra:
 "Verifica di essere autenticato su Microsoft 365 nel browser e di avere

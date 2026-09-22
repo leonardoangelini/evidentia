@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 import { defineConfig } from 'wxt';
 import { GOOGLE_ORIGINS } from './src/google/origins';
+import { SHAREPOINT_ORIGINS } from './src/sharepoint/origins';
 
 /**
  * Canale di build. `production` è il pacchetto che va sul Chrome Web Store;
@@ -58,13 +59,6 @@ function extensionKey(): string | undefined {
   }
 }
 
-/**
- * SharePoint Online / OneDrive for Business hosts. The teacher's own session
- * cookies are attached to REST calls made from extension pages, read-only.
- * Keep this list narrow: no <all_urls>.
- */
-export const SHAREPOINT_HOSTS = ['*://*.sharepoint.com/*', '*://*.sharepoint-df.com/*', '*://*.sharepoint.us/*'];
-
 export default defineConfig({
   srcDir: 'src',
   // EVIDENTIA_OUT_DIR lets a second dev instance build elsewhere without clobbering .output.
@@ -77,11 +71,12 @@ export default defineConfig({
     // test in tests/manifest.test.ts. Traduce la descrizione breve della
     // scheda, in docs/store-listing.md.
     description: 'Reconstructs the writing process of a Word or Google Docs document from its version history, locally. Not an AI detector.',
-    permissions: ['storage', 'tabs', 'identity'],
-    host_permissions: SHAREPOINT_HOSTS,
-    // Unica definizione: src/google/permissions.ts la riusa per chrome.permissions,
-    // così manifest e richiesta a runtime non possono divergere.
-    optional_host_permissions: GOOGLE_ORIGINS,
+    // Nessun permesso con avviso all'installazione: activeTab al posto di tabs
+    // (l'URL della tab serve solo quando il docente clicca l'icona) e nessun
+    // host obbligatorio. SharePoint e Google sono chiesti a runtime, con un
+    // click, dai moduli permissions.ts che riusano le stesse liste.
+    permissions: ['storage', 'activeTab', 'identity'],
+    optional_host_permissions: [...SHAREPOINT_ORIGINS, ...GOOGLE_ORIGINS],
     action: { default_title: CHANNEL === 'production' ? 'Evidentia' : 'Evidentia (Testing)' },
     ...versionFields(),
     ...(extensionKey() ? { key: extensionKey() } : {}),
