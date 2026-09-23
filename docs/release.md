@@ -65,8 +65,10 @@ una. Il primo upload va fatto dalla dashboard
    icona 128, categoria, lingua, URL privacy. Testi pronti:
    [store-listing.md](store-listing.md).
 
-> Sezione **Privacy practices**: dichiara `storage`, `tabs`, `identity`, gli
-> host `*.sharepoint.com` e quelli opzionali Google, motivando ogni permesso.
+> Sezione **Privacy practices**: dichiara `storage`, `activeTab`, `identity` e
+> gli host opzionali SharePoint e Google, motivando ogni permesso. Quando il
+> manifest cambia permessi, le giustificazioni vanno aggiornate prima del
+> push, o la submission fallisce.
 > È la causa più frequente di rifiuto. Materiale: [PRIVACY.md](../PRIVACY.md).
 
 Una scheda incompleta non fa fallire l'upload dello ZIP ma la **submission**,
