@@ -8,6 +8,15 @@ Questo file è incluso nell'estensione: è quello che la scheda *Info* mostra
 senza bisogno di collegarsi a internet. Va aggiornato **prima** di alzare la
 `version` in `package.json` (vedi [docs/release.md](docs/release.md)).
 
+## 0.3.1 — 2026-11-20
+
+- **Google Docs funziona senza configurazione.** L'estensione dello store
+  include ora un client ID OAuth: non serve più inserirne uno nelle
+  *Impostazioni* per analizzare un documento Google Docs o un file Word in
+  Google Drive. Il campo resta per le scuole che vogliono usare il proprio
+  progetto Google Cloud; se contiene un client ID inesistente, Google
+  risponde "Accesso bloccato: errore di autorizzazione" — svuotalo.
+
 ## 0.3.0 — 2026-09-21
 
 Meno permessi, chiesti solo quando servono.
