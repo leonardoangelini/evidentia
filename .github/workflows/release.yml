@@ -153,7 +153,7 @@ jobs:
             echo "|---|---|"
             echo "| name | $(node -p "require('./$MANIFEST').name") |"
             echo "| version | $(node -p "require('./$MANIFEST').version") |"
-            echo "| client ID OAuth nella build | $([ -n "${{ vars.WXT_GOOGLE_CLIENT_ID }}" ] && echo 'presente' || echo 'assente — la scuola usa il proprio') |"
+            echo "| client ID OAuth nella build | $([ -n "${{ vars.WXT_GOOGLE_CLIENT_ID }}" ] && echo 'presente' || echo 'assente — Google Docs non funzionerà') |"
             echo "| dry run | ${{ inputs.dry_run || false }} |"
             echo "| pubblicazione | $([ '${{ steps.preflight.outputs.configured }}' = 'true' ] && echo 'sì' || echo 'saltata: environment senza credenziali') |"
           } >> "$GITHUB_STEP_SUMMARY"

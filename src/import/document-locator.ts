@@ -5,7 +5,7 @@
 import { createGoogleTokenProvider, resolveGoogleClientId } from '@/google/google-auth';
 import { GoogleDriveClient } from '@/google/google-drive-client';
 import { parseGoogleDocsLocator, type GoogleDocsLocator } from '@/google/locator';
-import type { DocumentProvider, Settings } from '@/models';
+import type { DocumentProvider } from '@/models';
 import { parseSharePointLocator, type SharePointLocator } from '@/sharepoint/locator';
 import { SharePointClient } from '@/sharepoint/sharepoint-client';
 import type { VersionSource } from './version-source';
@@ -16,12 +16,12 @@ export function parseDocumentLocator(url: string): DocumentLocator | null {
   return parseSharePointLocator(url) ?? parseGoogleDocsLocator(url);
 }
 
-export function createVersionSource(locator: DocumentLocator, settings: Settings): VersionSource {
+export function createVersionSource(locator: DocumentLocator): VersionSource {
   switch (locator.provider) {
     case 'SHAREPOINT':
       return new SharePointClient(locator);
     case 'GOOGLE_DOCS':
-      return new GoogleDriveClient(locator, createGoogleTokenProvider(resolveGoogleClientId(settings)));
+      return new GoogleDriveClient(locator, createGoogleTokenProvider(resolveGoogleClientId()));
   }
 }
 

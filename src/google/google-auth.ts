@@ -17,7 +17,6 @@
  * The extension still calls the API only for the one document being analysed.
  */
 import { VersionSourceError } from '@/import/version-source';
-import type { Settings } from '@/models';
 
 export const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -46,10 +45,8 @@ export class GoogleAuthError extends VersionSourceError {
   }
 }
 
-/** Client id from the settings, else the one compiled into the build (WXT_GOOGLE_CLIENT_ID). */
-export function resolveGoogleClientId(settings: Pick<Settings, 'googleClientId'>): string {
-  const fromSettings = settings.googleClientId.trim();
-  if (fromSettings) return fromSettings;
+/** The OAuth client id compiled into the build (WXT_GOOGLE_CLIENT_ID). */
+export function resolveGoogleClientId(): string {
   const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
   return (env?.WXT_GOOGLE_CLIENT_ID ?? '').trim();
 }
@@ -70,7 +67,7 @@ export function createGoogleTokenProvider(clientId: string): TokenProvider {
 
   return {
     async get(interactive = true): Promise<string> {
-      if (!clientId) throw new GoogleAuthError('Google Docs: nessun client ID OAuth configurato. Inseriscilo nelle impostazioni di Evidentia (vedi docs/google-docs.md).');
+      if (!clientId) throw new GoogleAuthError('Google Docs: questa build di Evidentia non include un client ID OAuth (WXT_GOOGLE_CLIENT_ID, vedi docs/google-docs.md).');
       const cached = await read();
       if (usable(cached)) return cached.accessToken;
       // Silent renewal first: no window if Google still has a session for the account.

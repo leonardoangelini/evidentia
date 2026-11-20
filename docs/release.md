@@ -114,7 +114,7 @@ secret):
 
 | Variabile | Valore |
 |---|---|
-| `WXT_GOOGLE_CLIENT_ID` (opzionale) | client ID OAuth compilato nella build per Google Docs. Se assente, ogni scuola inserisce il proprio nelle impostazioni. Vedi [google-docs.md](google-docs.md) |
+| `WXT_GOOGLE_CLIENT_ID` | client ID OAuth compilato nella build per Google Docs. Se assente, Google Docs non funziona: non c'è un'alternativa nelle impostazioni. Vedi [google-docs.md](google-docs.md) |
 
 La chiave PEM contiene a-capo: si conserva in base64 e il workflow la decodifica.
 

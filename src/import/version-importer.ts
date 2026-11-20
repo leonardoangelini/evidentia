@@ -49,7 +49,7 @@ export interface ImportOptions {
 export async function importVersionHistory(options: ImportOptions): Promise<ImportResult> {
   const { locator, settings, extensionVersion } = options;
   const progress = options.onProgress ?? (() => undefined);
-  const client = options.client ?? createVersionSource(locator, settings);
+  const client = options.client ?? createVersionSource(locator);
   const provider = client.provider;
   const startedAt = Date.now();
 

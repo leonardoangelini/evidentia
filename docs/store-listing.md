@@ -74,7 +74,7 @@ Evidentia has a single purpose: to let a teacher review the version history of o
 ### Permesso `storage`
 
 ```
-Stores the user's own settings (privacy mode, session threshold, session start-up margin, optional OAuth client id) in chrome.storage.local, and keeps the short-lived Google OAuth access token in chrome.storage.session (memory only). No document content and no personal data are stored through this permission.
+Stores the user's own settings (privacy mode, session threshold, session start-up margin) in chrome.storage.local, and keeps the short-lived Google OAuth access token in chrome.storage.session (memory only). No document content and no personal data are stored through this permission.
 ```
 
 ### Permesso `activeTab`

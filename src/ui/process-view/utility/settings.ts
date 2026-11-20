@@ -13,7 +13,6 @@ export function renderSettings(ctx: ViewContext): HTMLElement {
   const longGap = h('input', { type: 'number', min: 1, max: 720, value: s.longIntervalHours }) as HTMLInputElement;
   const leadIn = h('input', { type: 'number', min: 0, max: 60, value: s.sessionLeadInMinutes }) as HTMLInputElement;
   const maxV = h('input', { type: 'number', min: 10, max: 5000, value: s.maxVersions }) as HTMLInputElement;
-  const googleClientId = h('input', { type: 'text', value: s.googleClientId, placeholder: 'xxxxxxxx.apps.googleusercontent.com (vuoto: usa quello incluso nella build, se presente)', spellcheck: 'false' }) as HTMLInputElement;
   const studentId = h('input', { type: 'text', value: s.student.studentId ?? '', placeholder: 'pseudonimo, es. studente-17' }) as HTMLInputElement;
   const assignmentId = h('input', { type: 'text', value: s.student.assignmentId ?? '', placeholder: 'es. saggio-1' }) as HTMLInputElement;
   const courseId = h('input', { type: 'text', value: s.student.courseId ?? '', placeholder: 'es. PED-101' }) as HTMLInputElement;
@@ -26,7 +25,6 @@ export function renderSettings(ctx: ViewContext): HTMLElement {
       longIntervalHours: clamp(Number(longGap.value), 1, 720),
       sessionLeadInMinutes: clamp(Number(leadIn.value), 0, 60),
       maxVersions: clamp(Number(maxV.value), 10, 5000),
-      googleClientId: googleClientId.value.trim(),
       student: { studentId: studentId.value.trim() || undefined, assignmentId: assignmentId.value.trim() || undefined, courseId: courseId.value.trim() || undefined },
     };
     return ctx.saveSettings(next);
@@ -41,8 +39,7 @@ export function renderSettings(ctx: ViewContext): HTMLElement {
     h('h3', {}, 'SharePoint / OneDrive'),
     h('div', { class: 'row' }, h('button', { onclick: () => void ctx.revokeSharePoint() }, 'Revoca l\'accesso ai siti SharePoint'), h('span', { class: 'muted small' }, 'Evidentia contatta solo i siti SharePoint che hai autorizzato, uno alla volta, alla prima analisi. Revocando, li chiederà di nuovo alla prossima.')),
     h('h3', {}, 'Google Docs'),
-    h('label', {}, 'Client ID OAuth 2.0 (progetto Google Cloud della scuola; redirect URI ' + googleRedirectUrl() + ')'), googleClientId,
-    h('div', { class: 'row', style: 'margin-top:8px' }, h('button', { onclick: () => void ctx.disconnectGoogle() }, 'Disconnetti Google e revoca il permesso'), h('span', { class: 'muted small' }, 'Dimentica l\'autorizzazione e ritira l\'accesso a googleapis.com / docs.google.com fino alla prossima analisi di un documento Google.')),
+    h('div', { class: 'row' }, h('button', { onclick: () => void ctx.disconnectGoogle() }, 'Disconnetti Google e revoca il permesso'), h('span', { class: 'muted small' }, 'Dimentica l\'autorizzazione e ritira l\'accesso a googleapis.com / docs.google.com fino alla prossima analisi di un documento Google.')),
     h('h3', {}, 'Identificativi opzionali (preferisci pseudonimi)'),
     h('label', {}, 'Student ID / pseudonimo'), studentId,
     h('label', {}, 'Assignment ID'), assignmentId,
@@ -53,14 +50,6 @@ export function renderSettings(ctx: ViewContext): HTMLElement {
     h('div', { class: 'notice' }, h('strong', {}, 'Privacy.'), ' Tutti i dati restano nel browser. Le versioni sono lette in sola lettura: con la tua sessione Microsoft 365 per SharePoint/OneDrive, con la tua autorizzazione Google (Drive API) per Google Docs. Nessun server, nessuna telemetria, nessuna API AI. L\'unico modo in cui i dati escono è l\'export avviato da te.'),
   );
   return el;
-}
-
-function googleRedirectUrl(): string {
-  try {
-    return chrome.identity.getRedirectURL();
-  } catch {
-    return 'https://<id-estensione>.chromiumapp.org/';
-  }
 }
 
 function clamp(n: number, lo: number, hi: number): number {

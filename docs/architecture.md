@@ -41,7 +41,7 @@ rimosso. Conseguenze:
 | OneDrive consumer (onedrive.live.com) | Non supportato | Nessuna API REST accessibile con i cookie. |
 | Google Docs: riconoscimento dall'URL | Alta | `docs.google.com/document/d/<id>`; anche `.docx` in Drive (`drive.google.com/file/d/<id>`). |
 | Google Docs: elenco e download revisioni (Drive API v3) | Alta (API documentata) | Ogni revisione esportata in DOCX tramite `exportLinks`; stesso estrattore di Word. |
-| Google Docs: autenticazione | Media | OAuth con `chrome.identity.launchWebAuthFlow`; serve un client ID (impostazioni o build). Scope `drive.readonly` è *restricted*: consenso Interno per Workspace, altrimenti verifica Google. |
+| Google Docs: autenticazione | Media | OAuth con `chrome.identity.launchWebAuthFlow`; serve un client ID, compilato nella build. Scope `drive.readonly` è *restricted*: consenso Interno per Workspace, altrimenti verifica Google. |
 | Google Docs: completezza | **Bassa** | L'API espone solo parte delle revisioni (più rade dell'editor) e Google può accorparle. Dichiarato come limite. |
 
 Decisione architetturale: ogni versione ha uno stato di estrazione (`FULL`

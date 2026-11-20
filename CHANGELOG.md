@@ -8,6 +8,14 @@ Questo file è incluso nell'estensione: è quello che la scheda *Info* mostra
 senza bisogno di collegarsi a internet. Va aggiornato **prima** di alzare la
 `version` in `package.json` (vedi [docs/release.md](docs/release.md)).
 
+## 0.3.2 — 2026-11-20
+
+- Nelle **Impostazioni** non c'è più il campo *Client ID OAuth 2.0* della
+  sezione Google Docs: Evidentia usa sempre il client ID incluso
+  nell'estensione. Un valore inserito in passato viene ignorato e cancellato
+  al primo salvataggio delle impostazioni, così non può più causare
+  "Accesso bloccato: errore di autorizzazione".
+
 ## 0.3.1 — 2026-11-20
 
 - **Google Docs funziona senza configurazione.** L'estensione dello store

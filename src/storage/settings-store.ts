@@ -12,8 +12,10 @@ function storageSet(key: string, value: unknown): Promise<void> {
 }
 
 export async function loadSettings(): Promise<Settings> {
-  const stored = await storageGet<Partial<Settings>>(SETTINGS_KEY);
-  return { ...DEFAULT_SETTINGS, ...(stored ?? {}), student: { ...DEFAULT_SETTINGS.student, ...(stored?.student ?? {}) } };
+  const raw = await storageGet<Partial<Settings> & { googleClientId?: unknown }>(SETTINGS_KEY);
+  // googleClientId was a setting until 0.3.1: drop it so a stale value is never saved back.
+  const { googleClientId: _legacy, ...stored } = raw ?? {};
+  return { ...DEFAULT_SETTINGS, ...stored, student: { ...DEFAULT_SETTINGS.student, ...(stored.student ?? {}) } };
 }
 
 export async function saveSettings(settings: Settings): Promise<void> {

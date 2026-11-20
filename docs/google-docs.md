@@ -81,14 +81,14 @@ Serve un **client OAuth 2.0** in un progetto Google Cloud:
    tutti gli altri casi (vedi sotto).
 3. *Credenziali* → *Crea credenziali* → **ID client OAuth** → tipo
    **Applicazione web** → URI di reindirizzamento autorizzato:
-   `https://<id-estensione>.chromiumapp.org/` (l'id esatto è mostrato
-   nelle impostazioni di Evidentia, sezione Google Docs).
-4. Il client ID (`….apps.googleusercontent.com`) va:
-   - nelle **impostazioni di Evidentia** (ogni docente o la scuola per i
-     propri docenti), oppure
-   - nella **build**, con la variabile `WXT_GOOGLE_CLIENT_ID` (file `.env`
-     in locale, *Actions variable* su GitHub): diventa il valore predefinito
-     quando il campo nelle impostazioni è vuoto.
+   `https://<id-estensione>.chromiumapp.org/` (l'id esatto è quello che
+   `chrome://extensions` mostra per l'estensione).
+4. Il client ID (`….apps.googleusercontent.com`) va nella **build**, con la
+   variabile `WXT_GOOGLE_CLIENT_ID` (file `.env` in locale, *Actions
+   variable* su GitHub). Non c'è un campo nelle impostazioni: fino alla
+   0.3.1 c'era, ed è stato tolto perché un valore sbagliato bloccava
+   l'accesso ("OAuth client was not found") senza che il docente sapesse
+   perché.
 
 > Chi installa Evidentia dal Chrome Web Store usa il client ID della build
 > ufficiale. Chi **forka** il progetto deve registrarne uno proprio: usare il
@@ -114,9 +114,7 @@ dalla build), quindi cambierebbe di continuo. Per fissarlo, `wxt.config.ts`
 mette nel manifest la chiave pubblica `WXT_EXTENSION_KEY` letta da `.env`
 (vedi `.env.example` per generarla): con la chiave l'id è lo stesso in ogni
 profilo e cartella, ed è quello da registrare come redirect URI di sviluppo.
-Per leggerlo, carica la build in `chrome://extensions` — oppure aprilo dalle
-impostazioni di Evidentia, sezione Google Docs, che mostrano il redirect URI
-completo.
+Per leggerlo, carica la build in `chrome://extensions`.
 
 In CI la variabile non esiste, quindi lo ZIP per lo store non contiene la
 chiave e l'item usa l'id assegnato dallo store.

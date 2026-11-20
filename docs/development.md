@@ -144,7 +144,7 @@ decide Google. Procedura completa in [release.md](release.md).
 |---|---|
 | `EVIDENTIA_CHANNEL` | `testing` (default) o `production`: nome visibile e `version` del pacchetto. Mai il codice |
 | `EVIDENTIA_BUILD_NUMBER` | quarta componente della version sul canale testing (in CI è il numero di run), per distinguere due build della stessa version |
-| `WXT_GOOGLE_CLIENT_ID` | client ID OAuth predefinito per Google Docs; le impostazioni lo sovrascrivono |
+| `WXT_GOOGLE_CLIENT_ID` | client ID OAuth per Google Docs, compilato nella build (senza, Google Docs non funziona) |
 | `WXT_EXTENSION_KEY` | chiave pubblica che fissa l'id delle build locali (assente in CI) |
 | `EVIDENTIA_OUT_DIR` | cartella di output alternativa, per costruire due varianti senza sovrascriversi |
 

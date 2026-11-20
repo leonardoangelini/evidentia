@@ -209,7 +209,8 @@ Poi `chrome://extensions` (o `edge://extensions`) → modalità sviluppatore →
 *Carica estensione non pacchettizzata* → cartella `.output/chrome-mv3`.
 
 Una build da sorgente ha un ID estensione diverso da quello pubblicato, quindi
-per Google Docs serve un client ID OAuth proprio: vedi
+per Google Docs serve un client ID OAuth proprio, compilato nella build con
+`WXT_GOOGLE_CLIENT_ID`: vedi
 [docs/google-docs.md](docs/google-docs.md). Chi installa dal Chrome Web Store
 non deve configurare nulla.
 
